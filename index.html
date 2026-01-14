@@ -3,89 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ousadia & Alegria</title>
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Fonte -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-  </style>
+  <title>Pelada App</title>
 </head>
+<body>
 
-<body class="bg-zinc-950 text-zinc-100">
+  <h1>Pelada App (Modo Local)</h1>
 
-  <!-- HEADER -->
-  <header class="p-4 border-b border-zinc-800">
-    <h1 class="text-xl font-bold text-green-500">
-      Ousadia & Alegria
-    </h1>
-    <p class="text-sm text-zinc-400">
-      Gestão de peladas
-    </p>
-  </header>
+  <button onclick="criarPelada()">Criar Pelada</button>
+  <button onclick="listarPeladas()">Listar Peladas</button>
 
-  <!-- CONTEÚDO -->
-  <main class="p-4 space-y-4">
+  <pre id="output"></pre>
 
-    <!-- CARD PELADA -->
-    <section class="bg-zinc-900 rounded-xl p-4">
-      <h2 class="text-lg font-semibold">
-        Pelada de Quinta
-      </h2>
-
-      <div class="mt-3 flex justify-between text-sm">
-        <span>Jogadores confirmados</span>
-        <span class="font-bold text-green-500">10</span>
-      </div>
-
-      <div class="mt-2 flex justify-between text-sm">
-        <span>Valor</span>
-        <span class="font-bold">R$ 20</span>
-      </div>
-    </section>
-
-    <!-- AÇÕES -->
-    <section class="grid grid-cols-2 gap-3">
-      <button class="bg-green-600 py-3 rounded-xl font-semibold">
-        Confirmar presença
-      </button>
-      <button class="bg-zinc-800 py-3 rounded-xl font-semibold">
-        Sortear times
-      </button>
-    </section>
-
-    <!-- LISTA JOGADORES -->
-    <section class="bg-zinc-900 rounded-xl p-4">
-      <h3 class="font-semibold mb-3">
-        Jogadores
-      </h3>
-
-      <ul class="space-y-2 text-sm">
-        <li class="flex justify-between">
-          <span>João</span>
-          <span class="text-green-500">Pago</span>
-        </li>
-        <li class="flex justify-between">
-          <span>Carlos</span>
-          <span class="text-yellow-500">Pendente</span>
-        </li>
-        <li class="flex justify-between">
-          <span>Rafael</span>
-          <span class="text-green-500">Pago</span>
-        </li>
-      </ul>
-    </section>
-
-  </main>
-
+  <script src="app.js"></script>
 </body>
 </html>
-
