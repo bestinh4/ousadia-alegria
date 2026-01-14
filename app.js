@@ -1,36 +1,38 @@
-// ===== DADOS SIMULADOS =====
-
-let usuarioLogado = {
-  id: "user_1",
-  nome: "Organizador"
-};
-
+// Estado local (simples de propósito)
 let peladas = [];
-let participacoes = [];
 
-// ===== FUNÇÕES =====
-
+// Criar uma nova pelada
 function criarPelada() {
-  const pelada = {
-    id: "pelada_" + Date.now(),
-    nome: "Pelada Teste",
-    dataHora: new Date(),
-    valor: 20,
-    status: "ativa",
-    criadaPor: usuarioLogado.id
+  const novaPelada = {
+    id: Date.now(),
+    nome: `Pelada ${peladas.length + 1}`,
+    criadaEm: new Date().toLocaleString()
   };
 
-  peladas.push(pelada);
+  peladas.push(novaPelada);
 
-  log("Pelada criada:", pelada);
+  document.getElementById("output").innerHTML =
+    `Pelada criada: <strong>${novaPelada.nome}</strong>`;
+
+  console.log("Peladas:", peladas);
 }
 
+// Listar todas as peladas
 function listarPeladas() {
-  log("Peladas:", peladas);
-}
+  const output = document.getElementById("output");
 
-function log(titulo, dado) {
-  document.getElementById("output").textContent =
-    titulo + "\n" + JSON.stringify(dado, null, 2);
-}
+  if (peladas.length === 0) {
+    output.innerHTML = "Nenhuma pelada criada ainda.";
+    return;
+  }
 
+  let html = "<strong>Peladas criadas:</strong><ul>";
+
+  peladas.forEach(pelada => {
+    html += `<li>${pelada.nome} — ${pelada.criadaEm}</li>`;
+  });
+
+  html += "</ul>";
+
+  output.innerHTML = html;
+}
