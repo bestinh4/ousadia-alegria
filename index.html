@@ -4,16 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pelada App</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 24px;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+    }
+
+    button {
+      margin-right: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    #output {
+      margin-top: 20px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      min-height: 40px;
+    }
+  </style>
 </head>
 <body>
 
   <h1>Pelada App (Modo Local)</h1>
 
- <button id="btnCriar">Criar Pelada</button>
-<button id="btnListar">Listar Peladas</button>
-  
-  <pre id="output"></pre>
+  <button onclick="criarPelada()">Criar Pelada</button>
+  <button onclick="listarPeladas()">Listar Peladas</button>
 
+  <div id="output"></div>
+
+  <!-- Script sempre no final -->
   <script src="app.js"></script>
 </body>
 </html>
