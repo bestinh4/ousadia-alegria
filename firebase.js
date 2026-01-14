@@ -15,3 +15,4 @@ const db = getFirestore(app);
 
 window.db = db;
 
+console.log("Firestore conectado com sucesso");
