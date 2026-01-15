@@ -4,99 +4,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resenha Pro</title>
-
-  <!-- Tailwind (apenas desenvolvimento) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    body {
-      background-color: #09090b;
-      color: #f4f4f5;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-    }
-  </style>
 </head>
 
-<body class="min-h-screen flex flex-col items-center justify-center gap-6">
+<body class="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
 
-  <h1 class="text-3xl font-bold">Resenha Pro</h1>
+  <div class="w-full max-w-sm space-y-4">
 
-  <button
-    id="btnCriar"
-    class="px-6 py-3 bg-green-600 rounded text-white hover:bg-green-700"
-  >
-    Criar Pelada
-  </button>
+    <h1 class="text-2xl font-bold text-center">Resenha Pro</h1>
 
-  <button
-    id="btnListar"
-    class="px-6 py-3 bg-blue-600 rounded text-white hover:bg-blue-700"
-  >
-    Listar Peladas
-  </button>
+    <input id="email" type="email" placeholder="Email"
+      class="w-full p-3 rounded bg-zinc-800" />
 
-  <pre
-    id="output"
-    class="w-full max-w-md bg-black p-4 rounded text-sm overflow-auto"
-  ></pre>
+    <input id="password" type="password" placeholder="Senha"
+      class="w-full p-3 rounded bg-zinc-800" />
 
-  <!-- APP -->
+    <button id="btnCadastrar"
+      class="w-full p-3 bg-green-600 rounded">
+      Criar Conta
+    </button>
+
+    <button id="btnLogin"
+      class="w-full p-3 bg-blue-600 rounded">
+      Entrar
+    </button>
+
+    <pre id="output" class="text-sm"></pre>
+
+  </div>
+
   <script type="module">
-    import { db } from "./firebase.js";
+    import { auth } from "./firebase.js";
     import {
-      collection,
-      addDoc,
-      getDocs,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
     const output = document.getElementById("output");
 
-    document.getElementById("btnCriar").addEventListener("click", async () => {
+    document.getElementById("btnCadastrar").onclick = async () => {
       try {
-        const docRef = await addDoc(collection(db, "peladas"), {
-          nome: "Pelada Teste",
-          criadaEm: serverTimestamp()
-        });
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-        output.textContent =
-          "Pelada criada com sucesso!\nID: " + docRef.id;
-      } catch (error) {
-        console.error(error);
-        output.textContent =
-          "Erro ao criar pelada:\n" + error.message;
+        await createUserWithEmailAndPassword(auth, email, password);
+        output.textContent = "Conta criada com sucesso!";
+      } catch (err) {
+        output.textContent = err.message;
       }
-    });
+    };
 
-    document.getElementById("btnListar").addEventListener("click", async () => {
+    document.getElementById("btnLogin").onclick = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "peladas"));
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-        if (snapshot.empty) {
-          output.textContent = "Nenhuma pelada encontrada.";
-          return;
-        }
-
-        let texto = "Histórico de Peladas:\n\n";
-
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const dataFormatada = data.criadaEm
-            ? data.criadaEm.toDate().toLocaleString("pt-BR")
-            : "sem data";
-
-          texto += `ID: ${doc.id}\n`;
-          texto += `Nome: ${data.nome}\n`;
-          texto += `Criada em: ${dataFormatada}\n\n`;
-        });
-
-        output.textContent = texto;
-      } catch (error) {
-        console.error(error);
-        output.textContent =
-          "Erro ao listar peladas:\n" + error.message;
+        await signInWithEmailAndPassword(auth, email, password);
+        output.textContent = "Login realizado!";
+      } catch (err) {
+        output.textContent = err.message;
       }
-    });
+    };
   </script>
 
 </body>
