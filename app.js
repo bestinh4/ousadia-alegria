@@ -19,10 +19,12 @@ const peladaSection = document.getElementById("peladaSection");
 const listaPeladas = document.getElementById("listaPeladas");
 const listaJogadores = document.getElementById("listaJogadores");
 const peladaTitulo = document.getElementById("peladaTitulo");
+const timesDiv = document.getElementById("times");
 
 // STATE
 let usuarioAtual = null;
 let peladaAtualId = null;
+let jogadoresConfirmados = [];
 
 // AUTH
 auth.onAuthStateChanged(user => {
@@ -40,16 +42,13 @@ auth.onAuthStateChanged(user => {
 
 // LOGIN
 window.login = async () => {
-  const email = email.value;
-  const senha = senha.value;
   try {
-    await auth.signInWithEmailAndPassword(email, senha);
+    await auth.signInWithEmailAndPassword(email.value, senha.value);
   } catch {
-    await auth.createUserWithEmailAndPassword(email, senha);
+    await auth.createUserWithEmailAndPassword(email.value, senha.value);
   }
 };
 
-// LOGOUT
 window.logout = () => auth.signOut();
 
 // PELADAS
@@ -85,6 +84,7 @@ window.entrarPelada = (id, nome) => {
   peladaTitulo.innerText = nome;
   peladasSection.classList.add("hidden");
   peladaSection.classList.remove("hidden");
+  timesDiv.innerHTML = "";
   carregarJogadores();
 };
 
@@ -101,16 +101,17 @@ function carregarJogadores() {
     .orderBy("nome")
     .onSnapshot(snapshot => {
       listaJogadores.innerHTML = "";
+      jogadoresConfirmados = [];
+
       snapshot.forEach(doc => {
         const j = doc.data();
+        if (j.confirmado) jogadoresConfirmados.push(j.nome);
+
         listaJogadores.innerHTML += `
           <div class="card ${j.confirmado ? "presente" : "ausente"}">
             <strong>${j.nome}</strong>
-            <div class="status">
-              ${j.confirmado ? "PRESENTE ✅" : "AUSENTE ❌"}
-            </div>
             <button onclick="togglePresenca('${doc.id}', ${j.confirmado})">
-              ${j.confirmado ? "Marcar ausência" : "Confirmar presença"}
+              ${j.confirmado ? "Presente" : "Ausente"}
             </button>
           </div>`;
       });
@@ -135,4 +136,29 @@ window.togglePresenca = async (id, atual) => {
     .collection("jogadores")
     .doc(id)
     .update({ confirmado: !atual });
+};
+
+// TIMES
+window.gerarTimes = () => {
+  if (jogadoresConfirmados.length < 2) {
+    alert("Poucos jogadores confirmados");
+    return;
+  }
+
+  const embaralhado = [...jogadoresConfirmados].sort(() => Math.random() - 0.5);
+  const meio = Math.ceil(embaralhado.length / 2);
+
+  const timeA = embaralhado.slice(0, meio);
+  const timeB = embaralhado.slice(meio);
+
+  timesDiv.innerHTML = `
+    <div class="card time">
+      <h3>Time A</h3>
+      ${timeA.map(j => `<div>${j}</div>`).join("")}
+    </div>
+    <div class="card time">
+      <h3>Time B</h3>
+      ${timeB.map(j => `<div>${j}</div>`).join("")}
+    </div>
+  `;
 };
