@@ -9,8 +9,8 @@
 
 <body class="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
 
-  <div class="w-full max-w-sm space-y-4">
-
+  <!-- LOGIN -->
+  <div id="login" class="w-full max-w-sm space-y-4">
     <h1 class="text-2xl font-bold text-center">Resenha Pro</h1>
 
     <input id="email" type="email" placeholder="Email"
@@ -29,40 +29,134 @@
       Entrar
     </button>
 
-    <pre id="output" class="text-sm"></pre>
+    <pre id="loginMsg" class="text-sm"></pre>
+  </div>
 
+  <!-- APP -->
+  <div id="app" class="hidden w-full max-w-md space-y-4">
+    <h2 class="text-xl font-bold text-center">Minhas Peladas</h2>
+
+    <button id="btnCriar"
+      class="w-full p-3 bg-green-600 rounded">
+      Criar Pelada
+    </button>
+
+    <button id="btnListar"
+      class="w-full p-3 bg-blue-600 rounded">
+      Listar Peladas
+    </button>
+
+    <button id="btnLogout"
+      class="w-full p-3 bg-red-600 rounded">
+      Sair
+    </button>
+
+    <pre id="output" class="text-sm bg-black p-3 rounded"></pre>
   </div>
 
   <script type="module">
-    import { auth } from "./firebase.js";
+    import { auth, db } from "./firebase.js";
     import {
       createUserWithEmailAndPassword,
-      signInWithEmailAndPassword
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
+    import {
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      where,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const loginDiv = document.getElementById("login");
+    const appDiv = document.getElementById("app");
     const output = document.getElementById("output");
+    const loginMsg = document.getElementById("loginMsg");
 
-    document.getElementById("btnCadastrar").onclick = async () => {
+    let usuarioAtual = null;
+
+    // OBSERVA LOGIN
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        usuarioAtual = user;
+        loginDiv.classList.add("hidden");
+        appDiv.classList.remove("hidden");
+      } else {
+        usuarioAtual = null;
+        loginDiv.classList.remove("hidden");
+        appDiv.classList.add("hidden");
+      }
+    });
+
+    // CADASTRO
+    btnCadastrar.onclick = async () => {
       try {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        await createUserWithEmailAndPassword(auth, email, password);
-        output.textContent = "Conta criada com sucesso!";
-      } catch (err) {
-        output.textContent = err.message;
+        await createUserWithEmailAndPassword(
+          auth,
+          email.value,
+          password.value
+        );
+        loginMsg.textContent = "Conta criada!";
+      } catch (e) {
+        loginMsg.textContent = e.message;
       }
     };
 
-    document.getElementById("btnLogin").onclick = async () => {
+    // LOGIN
+    btnLogin.onclick = async () => {
       try {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        await signInWithEmailAndPassword(
+          auth,
+          email.value,
+          password.value
+        );
+        loginMsg.textContent = "Login realizado!";
+      } catch (e) {
+        loginMsg.textContent = e.message;
+      }
+    };
 
-        await signInWithEmailAndPassword(auth, email, password);
-        output.textContent = "Login realizado!";
-      } catch (err) {
-        output.textContent = err.message;
+    // LOGOUT
+    btnLogout.onclick = async () => {
+      await signOut(auth);
+    };
+
+    // CRIAR PELADA
+    btnCriar.onclick = async () => {
+      try {
+        await addDoc(collection(db, "peladas"), {
+          nome: "Pelada do " + usuarioAtual.email,
+          ownerId: usuarioAtual.uid,
+          criadaEm: serverTimestamp()
+        });
+        output.textContent = "Pelada criada!";
+      } catch (e) {
+        output.textContent = e.message;
+      }
+    };
+
+    // LISTAR PELADAS DO USUÁRIO
+    btnListar.onclick = async () => {
+      try {
+        const q = query(
+          collection(db, "peladas"),
+          where("ownerId", "==", usuarioAtual.uid)
+        );
+
+        const snapshot = await getDocs(q);
+        let texto = "Suas peladas:\n\n";
+
+        snapshot.forEach(doc => {
+          texto += doc.data().nome + "\n";
+        });
+
+        output.textContent = texto || "Nenhuma pelada encontrada.";
+      } catch (e) {
+        output.textContent = e.message;
       }
     };
   </script>
