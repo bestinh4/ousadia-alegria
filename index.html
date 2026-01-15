@@ -1,59 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Peladas+</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      padding: 20px;
-    }
-
-    h2 {
-      margin-top: 30px;
-    }
-
-    input, button {
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-    }
-
-    button {
-      background: #2563eb;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1e40af;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      background: white;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 6px;
-    }
-
-    .confirmado {
-      background: #d1fae5;
-      color: #065f46;
-      font-weight: bold;
-    }
-
-    .hidden {
-      display: none;
-    }
+    body { font-family: Arial; background:#f3f4f6; padding:20px }
+    input, button { width:100%; padding:10px; margin:6px 0 }
+    button { background:#2563eb; color:white; border:none }
+    ul { list-style:none; padding:0 }
+    li { background:#fff; padding:8px; margin:4px 0 }
+    .hidden { display:none }
   </style>
 </head>
 
@@ -62,31 +25,25 @@
 <h1>Peladas+</h1>
 
 <section id="loginSection">
-  <h2>Login</h2>
-  <input id="email" placeholder="Email" />
-  <input id="senha" type="password" placeholder="Senha" />
+  <input id="email" placeholder="Email">
+  <input id="senha" type="password" placeholder="Senha">
   <button onclick="login()">Entrar / Criar conta</button>
 </section>
 
 <section id="appSection" class="hidden">
-
   <button onclick="logout()">Sair</button>
 
-  <h2>Criar Pelada</h2>
-  <input id="dataPelada" type="date" />
+  <h3>Criar Pelada</h3>
+  <input id="dataPelada" type="date">
   <button onclick="criarPelada()">Criar</button>
 
-  <h2>Minhas Peladas</h2>
+  <h3>Minhas Peladas</h3>
   <ul id="listaPeladas"></ul>
-
-  <h2>Jogadores</h2>
-  <input id="nomeJogador" placeholder="Seu nome na pelada" />
-  <button onclick="entrarPelada()">Entrar na pelada</button>
-
-  <ul id="listaJogadores"></ul>
-
 </section>
 
-<script type="module" src="app.js"></script>
+<!-- Ordem IMPORTA -->
+<script src="firebase.js"></script>
+<script src="app.js"></script>
+
 </body>
 </html>
