@@ -3,68 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <title>Peladas+</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Firebase v9 compat (SEM IMPORT) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 30px;
+      background: #f4f4f4;
+      padding: 20px;
     }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
     input, button {
       width: 100%;
       padding: 12px;
-      margin-bottom: 12px;
+      margin: 6px 0;
       font-size: 16px;
     }
-
     button {
       background: #2563eb;
       color: #fff;
       border: none;
       cursor: pointer;
     }
-
-    section {
-      max-width: 400px;
-      margin: auto;
+    button:hover {
+      opacity: 0.9;
+    }
+    .box {
       background: #fff;
-      padding: 20px;
-      border-radius: 6px;
+      padding: 16px;
+      border-radius: 8px;
+      max-width: 420px;
+      margin-bottom: 20px;
+    }
+    ul {
+      padding-left: 18px;
     }
   </style>
 </head>
+
 <body>
 
-  <!-- LOGIN -->
-  <section id="loginSection">
-    <h1>Peladas+</h1>
+  <h1>Peladas+</h1>
 
+  <!-- LOGIN -->
+  <div class="box" id="loginBox">
+    <h3>Login</h3>
     <input id="email" type="email" placeholder="Email" />
     <input id="senha" type="password" placeholder="Senha" />
-
-    <button id="loginBtn">Entrar / Criar conta</button>
-  </section>
+    <button onclick="login()">Entrar / Criar conta</button>
+  </div>
 
   <!-- APP -->
-  <section id="appSection" style="display:none">
-    <h1>Minhas Peladas</h1>
+  <div class="box" id="appBox" style="display:none">
+    <h3>Pelada</h3>
+    <button onclick="criarPelada()">Criar Pelada</button>
 
-    <input id="nomePelada" placeholder="Nome da pelada" />
-    <button id="criarPeladaBtn">Criar pelada</button>
+    <hr />
 
-    <ul id="listaPeladas"></ul>
+    <h3>Adicionar Jogador</h3>
+    <input id="jogadorNome" placeholder="Nome do jogador" />
+    <button onclick="criarJogador()">Adicionar Jogador</button>
 
-    <button id="logoutBtn">Sair</button>
-  </section>
+    <h4>Jogadores</h4>
+    <ul id="listaJogadores"></ul>
+  </div>
 
-  <!-- SCRIPT -->
-  <script type="module" src="app.js"></script>
+  <!-- FIREBASE CONFIG -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
+      authDomain: "ousadia-alegria-3269f.firebaseapp.com",
+      projectId: "ousadia-alegria-3269f",
+      storageBucket: "ousadia-alegria-3269f.firebasestorage.app",
+      messagingSenderId: "695364420342",
+      appId: "1:695364420342:web:aa130dfa6e019a271b22d7"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- APP JS -->
+  <script src="app.js"></script>
+
 </body>
 </html>
