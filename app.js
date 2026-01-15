@@ -1,95 +1,152 @@
-console.log("app.js carregado");
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
+  authDomain: "ousadia-alegria-3269f.firebaseapp.com",
+  projectId: "ousadia-alegria-3269f",
+  storageBucket: "ousadia-alegria-3269f.firebasestorage.app",
+  messagingSenderId: "695364420342",
+  appId: "1:695364420342:web:aa130dfa6e019a271b22d7"
+};
 
-let userAtual = null;
+// ===== INIT =====
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ===== DOM =====
+const loginSection = document.getElementById("loginSection");
+const peladasSection = document.getElementById("peladasSection");
+const peladaSection = document.getElementById("peladaSection");
+
+const listaPeladas = document.getElementById("listaPeladas");
+const listaJogadores = document.getElementById("listaJogadores");
+const peladaTitulo = document.getElementById("peladaTitulo");
+
+// ===== STATE =====
+let usuarioAtual = null;
 let peladaAtualId = null;
 
-firebase.auth().onAuthStateChanged((user) => {
+// ===== AUTH =====
+auth.onAuthStateChanged(user => {
   if (user) {
-    userAtual = user;
-    console.log("Usuário logado:", user.uid);
+    usuarioAtual = user;
+    loginSection.classList.add("hidden");
+    peladasSection.classList.remove("hidden");
+    carregarPeladas();
+  } else {
+    usuarioAtual = null;
+    loginSection.classList.remove("hidden");
+    peladasSection.classList.add("hidden");
+    peladaSection.classList.add("hidden");
   }
 });
 
-// LOGIN
+// ===== LOGIN =====
 window.login = async function () {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
 
-  try {
-    await firebase.auth().signInWithEmailAndPassword(email, senha);
-  } catch {
-    await firebase.auth().createUserWithEmailAndPassword(email, senha);
-  }
-};
-
-// CRIAR PELADA
-window.criarPelada = async function () {
-  if (!userAtual) {
-    alert("Usuário não logado");
+  if (!email || !senha) {
+    alert("Preencha email e senha");
     return;
   }
 
-  const nome = prompt("Nome da pelada:");
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+  } catch {
+    await auth.createUserWithEmailAndPassword(email, senha);
+  }
+};
 
-  if (!nome) return;
+// ===== LOGOUT =====
+window.logout = function () {
+  auth.signOut();
+};
 
-  const docRef = await firebase.firestore().collection("peladas").add({
+// ===== PELADAS =====
+function carregarPeladas() {
+  db.collection("peladas")
+    .where("ownerId", "==", usuarioAtual.uid)
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      listaPeladas.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <strong>${doc.data().nome}</strong>
+          <button onclick="entrarPelada('${doc.id}', '${doc.data().nome}')">
+            Entrar
+          </button>
+        `;
+        listaPeladas.appendChild(div);
+      });
+    });
+}
+
+window.criarPelada = async function () {
+  const nome = document.getElementById("novaPelada").value;
+
+  if (!nome) return alert("Informe o nome");
+
+  await db.collection("peladas").add({
     nome,
-    ownerId: userAtual.uid,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    ownerId: usuarioAtual.uid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  peladaAtualId = docRef.id;
-
-  alert("Pelada criada com sucesso");
-  console.log("Pelada ID:", peladaAtualId);
+  document.getElementById("novaPelada").value = "";
 };
 
-// CRIAR JOGADOR
+// ===== ENTRAR NA PELADA =====
+window.entrarPelada = function (id, nome) {
+  peladaAtualId = id;
+  peladaTitulo.innerText = nome;
+
+  peladasSection.classList.add("hidden");
+  peladaSection.classList.remove("hidden");
+
+  carregarJogadores();
+};
+
+window.voltarPeladas = function () {
+  peladaAtualId = null;
+  peladaSection.classList.add("hidden");
+  peladasSection.classList.remove("hidden");
+};
+
+// ===== JOGADORES =====
+function carregarJogadores() {
+  db.collection("peladas")
+    .doc(peladaAtualId)
+    .collection("jogadores")
+    .orderBy("nome")
+    .onSnapshot(snapshot => {
+      listaJogadores.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const jogador = doc.data();
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerText = jogador.nome;
+        listaJogadores.appendChild(div);
+      });
+    });
+}
+
 window.criarJogador = async function () {
-  if (!peladaAtualId) {
-    alert("Crie ou selecione uma pelada primeiro");
-    return;
-  }
+  const nome = document.getElementById("novoJogador").value;
 
-  const nome = document.getElementById("jogadorNome").value;
+  if (!nome) return alert("Informe o nome do jogador");
 
-  if (!nome) {
-    alert("Informe o nome do jogador");
-    return;
-  }
-
-  await firebase
-    .firestore()
-    .collection("peladas")
+  await db.collection("peladas")
     .doc(peladaAtualId)
     .collection("jogadores")
     .add({
       nome,
-      confirmado: false,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-  document.getElementById("jogadorNome").value = "";
-  listarJogadores();
+  document.getElementById("novoJogador").value = "";
 };
-
-// LISTAR JOGADORES
-async function listarJogadores() {
-  const lista = document.getElementById("listaJogadores");
-  lista.innerHTML = "";
-
-  const snapshot = await firebase
-    .firestore()
-    .collection("peladas")
-    .doc(peladaAtualId)
-    .collection("jogadores")
-    .orderBy("createdAt")
-    .get();
-
-  snapshot.forEach((doc) => {
-    const li = document.createElement("li");
-    li.textContent = doc.data().nome;
-    lista.appendChild(li);
-  });
-}
