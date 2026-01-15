@@ -1,4 +1,4 @@
-// ===== FIREBASE CONFIG =====
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
   authDomain: "ousadia-alegria-3269f.firebaseapp.com",
@@ -12,7 +12,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ===== DOM =====
+// DOM
 const loginSection = document.getElementById("loginSection");
 const peladasSection = document.getElementById("peladasSection");
 const peladaSection = document.getElementById("peladaSection");
@@ -20,11 +20,11 @@ const listaPeladas = document.getElementById("listaPeladas");
 const listaJogadores = document.getElementById("listaJogadores");
 const peladaTitulo = document.getElementById("peladaTitulo");
 
-// ===== STATE =====
+// STATE
 let usuarioAtual = null;
 let peladaAtualId = null;
 
-// ===== AUTH =====
+// AUTH
 auth.onAuthStateChanged(user => {
   if (user) {
     usuarioAtual = user;
@@ -38,10 +38,10 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// ===== LOGIN =====
-window.login = async function () {
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+// LOGIN
+window.login = async () => {
+  const email = email.value;
+  const senha = senha.value;
   try {
     await auth.signInWithEmailAndPassword(email, senha);
   } catch {
@@ -49,9 +49,10 @@ window.login = async function () {
   }
 };
 
+// LOGOUT
 window.logout = () => auth.signOut();
 
-// ===== PELADAS =====
+// PELADAS
 function carregarPeladas() {
   db.collection("peladas")
     .where("ownerId", "==", usuarioAtual.uid)
@@ -59,27 +60,26 @@ function carregarPeladas() {
     .onSnapshot(snapshot => {
       listaPeladas.innerHTML = "";
       snapshot.forEach(doc => {
-        const d = doc.data();
+        const p = doc.data();
         listaPeladas.innerHTML += `
           <div class="card">
-            <strong>${d.nome}</strong>
-            <button onclick="entrarPelada('${doc.id}','${d.nome}')">Entrar</button>
+            <strong>${p.nome}</strong>
+            <button onclick="entrarPelada('${doc.id}','${p.nome}')">Entrar</button>
           </div>`;
       });
     });
 }
 
 window.criarPelada = async () => {
-  const nome = novaPelada.value;
   await db.collection("peladas").add({
-    nome,
+    nome: novaPelada.value,
     ownerId: usuarioAtual.uid,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
   novaPelada.value = "";
 };
 
-// ===== ENTRAR =====
+// ENTRAR
 window.entrarPelada = (id, nome) => {
   peladaAtualId = id;
   peladaTitulo.innerText = nome;
@@ -93,7 +93,7 @@ window.voltarPeladas = () => {
   peladasSection.classList.remove("hidden");
 };
 
-// ===== JOGADORES =====
+// JOGADORES
 function carregarJogadores() {
   db.collection("peladas")
     .doc(peladaAtualId)
@@ -104,10 +104,13 @@ function carregarJogadores() {
       snapshot.forEach(doc => {
         const j = doc.data();
         listaJogadores.innerHTML += `
-          <div class="card ${j.confirmado ? "confirmado" : ""}">
+          <div class="card ${j.confirmado ? "presente" : "ausente"}">
             <strong>${j.nome}</strong>
+            <div class="status">
+              ${j.confirmado ? "PRESENTE ✅" : "AUSENTE ❌"}
+            </div>
             <button onclick="togglePresenca('${doc.id}', ${j.confirmado})">
-              ${j.confirmado ? "Confirmado" : "Confirmar"}
+              ${j.confirmado ? "Marcar ausência" : "Confirmar presença"}
             </button>
           </div>`;
       });
@@ -115,12 +118,11 @@ function carregarJogadores() {
 }
 
 window.criarJogador = async () => {
-  const nome = novoJogador.value;
   await db.collection("peladas")
     .doc(peladaAtualId)
     .collection("jogadores")
     .add({
-      nome,
+      nome: novoJogador.value,
       confirmado: true,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
