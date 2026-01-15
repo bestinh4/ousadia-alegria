@@ -1,41 +1,103 @@
-<script type="module">
-  import { db } from "./firebase.js";
-  import {
-    collection,
-    addDoc,
-    getDocs,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resenha Pro</title>
 
-  const output = document.getElementById("output");
+  <!-- Tailwind (apenas desenvolvimento) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  document.getElementById("btnCriar").onclick = async () => {
-    try {
-      const docRef = await addDoc(collection(db, "peladas"), {
-        nome: "Pelada Teste",
-        criadaEm: serverTimestamp()
-      });
-
-      output.textContent = "Pelada criada:\n" + docRef.id;
-    } catch (err) {
-      output.textContent = "Erro ao criar:\n" + err.message;
-      console.error(err);
+  <style>
+    body {
+      background-color: #09090b;
+      color: #f4f4f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
     }
-  };
+  </style>
+</head>
 
-  document.getElementById("btnListar").onclick = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "peladas"));
-      let texto = "Histórico:\n\n";
+<body class="min-h-screen flex flex-col items-center justify-center gap-6">
 
-      snapshot.forEach(doc => {
-        texto += doc.id + " | " + JSON.stringify(doc.data()) + "\n\n";
-      });
+  <h1 class="text-3xl font-bold">Resenha Pro</h1>
 
-      output.textContent = texto || "Nenhuma pelada encontrada";
-    } catch (err) {
-      output.textContent = "Erro ao listar:\n" + err.message;
-      console.error(err);
-    }
-  };
-</script>
+  <button
+    id="btnCriar"
+    class="px-6 py-3 bg-green-600 rounded text-white hover:bg-green-700"
+  >
+    Criar Pelada
+  </button>
+
+  <button
+    id="btnListar"
+    class="px-6 py-3 bg-blue-600 rounded text-white hover:bg-blue-700"
+  >
+    Listar Peladas
+  </button>
+
+  <pre
+    id="output"
+    class="w-full max-w-md bg-black p-4 rounded text-sm overflow-auto"
+  ></pre>
+
+  <!-- APP -->
+  <script type="module">
+    import { db } from "./firebase.js";
+    import {
+      collection,
+      addDoc,
+      getDocs,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const output = document.getElementById("output");
+
+    document.getElementById("btnCriar").addEventListener("click", async () => {
+      try {
+        const docRef = await addDoc(collection(db, "peladas"), {
+          nome: "Pelada Teste",
+          criadaEm: serverTimestamp()
+        });
+
+        output.textContent =
+          "Pelada criada com sucesso!\nID: " + docRef.id;
+      } catch (error) {
+        console.error(error);
+        output.textContent =
+          "Erro ao criar pelada:\n" + error.message;
+      }
+    });
+
+    document.getElementById("btnListar").addEventListener("click", async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "peladas"));
+
+        if (snapshot.empty) {
+          output.textContent = "Nenhuma pelada encontrada.";
+          return;
+        }
+
+        let texto = "Histórico de Peladas:\n\n";
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const dataFormatada = data.criadaEm
+            ? data.criadaEm.toDate().toLocaleString("pt-BR")
+            : "sem data";
+
+          texto += `ID: ${doc.id}\n`;
+          texto += `Nome: ${data.nome}\n`;
+          texto += `Criada em: ${dataFormatada}\n\n`;
+        });
+
+        output.textContent = texto;
+      } catch (error) {
+        console.error(error);
+        output.textContent =
+          "Erro ao listar peladas:\n" + error.message;
+      }
+    });
+  </script>
+
+</body>
+</html>
