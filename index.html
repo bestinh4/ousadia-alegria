@@ -16,7 +16,7 @@
     .card { padding: 12px; border-radius: 6px; margin-bottom: 8px; }
     .presente { background: #d1fae5; }
     .ausente { background: #e5e7eb; }
-    .status { font-size: 14px; margin-top: 6px; }
+    .time { background: #fff; border: 2px solid #000; margin-top: 10px; }
   </style>
 </head>
 
@@ -25,7 +25,7 @@
 <section id="loginSection">
   <h2>Login</h2>
   <input id="email" placeholder="Email">
-  <input id="senha" type="password" placeholder="Senha">
+  <input id="senha" type="password">
   <button onclick="login()">Entrar / Criar conta</button>
 </section>
 
@@ -39,9 +39,16 @@
 
 <section id="peladaSection" class="hidden">
   <h2 id="peladaTitulo"></h2>
+
   <input id="novoJogador" placeholder="Nome do jogador">
   <button onclick="criarJogador()">Adicionar jogador</button>
+
   <div id="listaJogadores"></div>
+
+  <button onclick="gerarTimes()">Gerar Times</button>
+
+  <div id="times"></div>
+
   <button onclick="voltarPeladas()">Voltar</button>
 </section>
 
