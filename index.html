@@ -1,57 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Peladas+</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Ousadia & Alegria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+  <script defer src="app.js"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f8; padding: 20px; }
-    input, button { width: 100%; padding: 10px; margin: 6px 0; }
-    .hidden { display: none; }
-    .card { padding: 12px; border-radius: 6px; margin-bottom: 8px; }
-    .presente { background: #d1fae5; }
-    .ausente { background: #e5e7eb; }
-    .time { background: #fff; border: 2px solid #000; margin-top: 10px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .card { border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; border-radius: 6px; }
+    button { padding: 8px; margin-top: 6px; }
+    input { padding: 6px; width: 100%; margin-top: 6px; }
   </style>
 </head>
 
 <body>
 
-<section id="loginSection">
-  <h2>Login</h2>
+<!-- LOGIN -->
+<div id="loginSection" class="card">
+  <h3>Login</h3>
   <input id="email" placeholder="Email">
-  <input id="senha" type="password">
-  <button onclick="login()">Entrar / Criar conta</button>
-</section>
+  <input id="senha" type="password" placeholder="Senha">
+  <button onclick="login()">Entrar / Criar Conta</button>
+</div>
 
-<section id="peladasSection" class="hidden">
+<!-- APP -->
+<div id="appSection" style="display:none">
+
   <h2>Minhas Peladas</h2>
-  <input id="novaPelada" placeholder="Nome da pelada">
+
+  <input id="nomePelada" placeholder="Nome da pelada">
   <button onclick="criarPelada()">Criar pelada</button>
+
   <div id="listaPeladas"></div>
+
   <button onclick="logout()">Sair</button>
-</section>
 
-<section id="peladaSection" class="hidden">
-  <h2 id="peladaTitulo"></h2>
+</div>
 
-  <input id="novoJogador" placeholder="Nome do jogador">
-  <button onclick="criarJogador()">Adicionar jogador</button>
+<!-- PELADA -->
+<div id="peladaSection" style="display:none">
+
+  <h2 id="tituloPelada"></h2>
+
+  <input id="nomeJogador" placeholder="Nome do jogador">
+  <button onclick="adicionarJogador()">Adicionar jogador</button>
 
   <div id="listaJogadores"></div>
 
   <button onclick="gerarTimes()">Gerar Times</button>
 
-  <div id="times"></div>
+  <div id="timesSection"></div>
+
+  <div id="placarSection" class="card" style="display:none">
+    <h3>Registrar Placar</h3>
+    <input id="golsA" type="number" placeholder="Gols Time A">
+    <input id="golsB" type="number" placeholder="Gols Time B">
+    <button onclick="salvarPartida()">Salvar Partida</button>
+  </div>
+
+  <div class="card">
+    <h3>Histórico</h3>
+    <div id="listaPartidas"></div>
+  </div>
 
   <button onclick="voltarPeladas()">Voltar</button>
-</section>
 
-<script src="app.js"></script>
+</div>
+
 </body>
 </html>
