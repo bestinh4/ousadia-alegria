@@ -1,3 +1,5 @@
+alert("app.js carregado com sucesso");
+
 // FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
