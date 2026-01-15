@@ -1,78 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Ousadia & Alegria</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resenha Pro</title>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- IMPORTANTE -->
   <script defer src="app.js"></script>
-
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .card { border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; border-radius: 6px; }
-    button { padding: 8px; margin-top: 6px; }
-    input { padding: 6px; width: 100%; margin-top: 6px; }
-  </style>
 </head>
 
-<body>
+<body class="bg-zinc-900 text-white p-4">
 
-<!-- LOGIN -->
-<div id="loginSection" class="card">
-  <h3>Login</h3>
-  <input id="email" placeholder="Email">
-  <input id="senha" type="password" placeholder="Senha">
-  <button onclick="login()">Entrar / Criar Conta</button>
-</div>
+  <!-- LOGIN -->
+  <div id="loginSection" class="max-w-md mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Login</h1>
 
-<!-- APP -->
-<div id="appSection" style="display:none">
+    <input id="email" class="w-full mb-2 p-2 text-black" placeholder="Email">
+    <input id="senha" type="password" class="w-full mb-4 p-2 text-black" placeholder="Senha">
 
-  <h2>Minhas Peladas</h2>
-
-  <input id="nomePelada" placeholder="Nome da pelada">
-  <button onclick="criarPelada()">Criar pelada</button>
-
-  <div id="listaPeladas"></div>
-
-  <button onclick="logout()">Sair</button>
-
-</div>
-
-<!-- PELADA -->
-<div id="peladaSection" style="display:none">
-
-  <h2 id="tituloPelada"></h2>
-
-  <input id="nomeJogador" placeholder="Nome do jogador">
-  <button onclick="adicionarJogador()">Adicionar jogador</button>
-
-  <div id="listaJogadores"></div>
-
-  <button onclick="gerarTimes()">Gerar Times</button>
-
-  <div id="timesSection"></div>
-
-  <div id="placarSection" class="card" style="display:none">
-    <h3>Registrar Placar</h3>
-    <input id="golsA" type="number" placeholder="Gols Time A">
-    <input id="golsB" type="number" placeholder="Gols Time B">
-    <button onclick="salvarPartida()">Salvar Partida</button>
+    <button onclick="login()" class="w-full bg-green-600 p-2 rounded">
+      Entrar / Criar Conta
+    </button>
   </div>
 
-  <div class="card">
-    <h3>Histórico</h3>
+  <!-- LISTA DE PELADAS -->
+  <div id="appSection" style="display:none">
+    <h2 class="text-xl font-bold mb-2">Minhas Peladas</h2>
+
+    <input id="nomePelada" class="w-full mb-2 p-2 text-black" placeholder="Nome da pelada">
+    <button onclick="criarPelada()" class="bg-blue-600 p-2 rounded mb-4">
+      Criar Pelada
+    </button>
+
+    <div id="listaPeladas"></div>
+
+    <button onclick="logout()" class="mt-4 text-red-400">Sair</button>
+  </div>
+
+  <!-- DETALHE DA PELADA -->
+  <div id="peladaSection" style="display:none">
+    <h2 id="tituloPelada" class="text-xl font-bold mb-2"></h2>
+
+    <input id="nomeJogador" class="w-full mb-2 p-2 text-black" placeholder="Nome do jogador">
+    <button onclick="adicionarJogador()" class="bg-green-600 p-2 rounded mb-4">
+      Adicionar jogador
+    </button>
+
+    <div id="listaJogadores" class="mb-4"></div>
+
+    <button onclick="gerarTimes()" class="bg-purple-600 p-2 rounded mb-4">
+      Gerar Times
+    </button>
+
+    <div id="times"></div>
+
+    <!-- PLACAR -->
+    <div id="placarSection" style="display:none" class="mt-4">
+      <input id="golsA" type="number" class="p-2 text-black" placeholder="Gols Time A">
+      <input id="golsB" type="number" class="p-2 text-black" placeholder="Gols Time B">
+      <button onclick="salvarPartida()" class="bg-yellow-500 p-2 rounded">
+        Salvar Partida
+      </button>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <h3 class="mt-6 font-bold">Histórico</h3>
     <div id="listaPartidas"></div>
+
+    <button onclick="voltarPeladas()" class="mt-4 text-blue-400">Voltar</button>
   </div>
-
-  <button onclick="voltarPeladas()">Voltar</button>
-
-</div>
 
 </body>
 </html>
