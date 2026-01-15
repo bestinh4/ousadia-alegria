@@ -1,6 +1,24 @@
-console.log("app.js carregado");
+// 🔥 FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// 🔥 Firebase config (SUAS CHAVES)
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
   authDomain: "ousadia-alegria-3269f.firebaseapp.com",
@@ -10,60 +28,71 @@ const firebaseConfig = {
   appId: "1:695364420342:web:aa130dfa6e019a271b22d7"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+// 🔹 ESTADO
+let usuario = null;
+let peladaAtualId = null;
+let jogadoresConfirmados = [];
+let ultimoTimeA = [];
+let ultimoTimeB = [];
 
-// UI
+// 🔹 SEÇÕES
 const loginSection = document.getElementById("loginSection");
 const appSection = document.getElementById("appSection");
 const peladaSection = document.getElementById("peladaSection");
 
-let usuario;
-let peladaAtualId;
-let ultimoTimeA = [];
-let ultimoTimeB = [];
-
 // 🔐 AUTH
-auth.onAuthStateChanged(user => {
+onAuthStateChanged(auth, user => {
+  if (!loginSection || !appSection || !peladaSection) return;
+
   if (user) {
     usuario = user;
     loginSection.style.display = "none";
     appSection.style.display = "block";
+    peladaSection.style.display = "none";
     carregarPeladas();
+  } else {
+    loginSection.style.display = "block";
+    appSection.style.display = "none";
+    peladaSection.style.display = "none";
   }
 });
 
+// 🔑 LOGIN
 window.login = async () => {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
 
   try {
-    await auth.signInWithEmailAndPassword(email, senha);
+    await signInWithEmailAndPassword(auth, email, senha);
   } catch {
-    await auth.createUserWithEmailAndPassword(email, senha);
+    await createUserWithEmailAndPassword(auth, email, senha);
   }
 };
 
-window.logout = () => auth.signOut();
+window.logout = () => signOut(auth);
 
-// 🏟️ PELADAS
+// 🟢 PELADAS
 async function carregarPeladas() {
   const lista = document.getElementById("listaPeladas");
   lista.innerHTML = "";
 
-  const snap = await db.collection("peladas")
-    .where("ownerId", "==", usuario.uid)
-    .get();
+  const q = query(
+    collection(db, "peladas"),
+    where("ownerId", "==", usuario.uid)
+  );
+
+  const snap = await getDocs(q);
 
   snap.forEach(doc => {
     lista.innerHTML += `
-      <div class="card">
+      <div class="p-2 bg-zinc-800 mt-2 cursor-pointer"
+           onclick="abrirPelada('${doc.id}','${doc.data().nome}')">
         ${doc.data().nome}
-        <button onclick="abrirPelada('${doc.id}', '${doc.data().nome}')">Abrir</button>
-      </div>
-    `;
+      </div>`;
   });
 }
 
@@ -71,10 +100,10 @@ window.criarPelada = async () => {
   const nome = document.getElementById("nomePelada").value;
   if (!nome) return;
 
-  await db.collection("peladas").add({
+  await addDoc(collection(db, "peladas"), {
     nome,
     ownerId: usuario.uid,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: serverTimestamp()
   });
 
   document.getElementById("nomePelada").value = "";
@@ -83,10 +112,16 @@ window.criarPelada = async () => {
 
 window.abrirPelada = async (id, nome) => {
   peladaAtualId = id;
+  document.getElementById("tituloPelada").innerText = nome;
+
   appSection.style.display = "none";
   peladaSection.style.display = "block";
-  document.getElementById("tituloPelada").innerText = nome;
-  carregarJogadores();
+
+  jogadoresConfirmados = [];
+  document.getElementById("listaJogadores").innerHTML = "";
+  document.getElementById("times").innerHTML = "";
+  document.getElementById("placarSection").style.display = "none";
+
   carregarHistorico();
 };
 
@@ -95,73 +130,54 @@ window.voltarPeladas = () => {
   appSection.style.display = "block";
 };
 
-// 👥 JOGADORES
-async function carregarJogadores() {
-  const lista = document.getElementById("listaJogadores");
-  lista.innerHTML = "";
-
-  const snap = await db.collection("peladas")
-    .doc(peladaAtualId)
-    .collection("jogadores")
-    .get();
-
-  snap.forEach(doc => {
-    lista.innerHTML += `<div>${doc.data().nome}</div>`;
-  });
-}
-
-window.adicionarJogador = async () => {
+// 👤 JOGADORES
+window.adicionarJogador = () => {
   const nome = document.getElementById("nomeJogador").value;
   if (!nome) return;
 
-  await db.collection("peladas")
-    .doc(peladaAtualId)
-    .collection("jogadores")
-    .add({ nome });
-
+  jogadoresConfirmados.push(nome);
   document.getElementById("nomeJogador").value = "";
-  carregarJogadores();
+  renderJogadores();
 };
 
+function renderJogadores() {
+  const lista = document.getElementById("listaJogadores");
+  lista.innerHTML = jogadoresConfirmados.map(j => `<div>${j}</div>`).join("");
+}
+
 // ⚽ TIMES
-window.gerarTimes = async () => {
-  const snap = await db.collection("peladas")
-    .doc(peladaAtualId)
-    .collection("jogadores")
-    .get();
+window.gerarTimes = () => {
+  if (jogadoresConfirmados.length < 2) return alert("Poucos jogadores");
 
-  let jogadores = snap.docs.map(d => d.data().nome);
-  jogadores.sort(() => Math.random() - 0.5);
+  const mix = [...jogadoresConfirmados].sort(() => Math.random() - 0.5);
+  const meio = Math.ceil(mix.length / 2);
 
-  const meio = Math.ceil(jogadores.length / 2);
-  ultimoTimeA = jogadores.slice(0, meio);
-  ultimoTimeB = jogadores.slice(meio);
+  ultimoTimeA = mix.slice(0, meio);
+  ultimoTimeB = mix.slice(meio);
 
-  document.getElementById("timesSection").innerHTML = `
-    <div class="card"><strong>Time A:</strong><br>${ultimoTimeA.join(", ")}</div>
-    <div class="card"><strong>Time B:</strong><br>${ultimoTimeB.join(", ")}</div>
+  document.getElementById("times").innerHTML = `
+    <div><strong>Time A:</strong> ${ultimoTimeA.join(", ")}</div>
+    <div><strong>Time B:</strong> ${ultimoTimeB.join(", ")}</div>
   `;
 
   document.getElementById("placarSection").style.display = "block";
 };
 
-// 🧾 PARTIDAS
+// 🏆 PARTIDAS
 window.salvarPartida = async () => {
   const golsA = Number(document.getElementById("golsA").value);
   const golsB = Number(document.getElementById("golsB").value);
 
-  if (isNaN(golsA) || isNaN(golsB)) return;
-
-  await db.collection("peladas")
-    .doc(peladaAtualId)
-    .collection("partidas")
-    .add({
+  await addDoc(
+    collection(db, "peladas", peladaAtualId, "partidas"),
+    {
       timeA: ultimoTimeA,
       timeB: ultimoTimeB,
       golsA,
       golsB,
-      data: firebase.firestore.FieldValue.serverTimestamp()
-    });
+      data: serverTimestamp()
+    }
+  );
 
   document.getElementById("golsA").value = "";
   document.getElementById("golsB").value = "";
@@ -173,19 +189,18 @@ async function carregarHistorico() {
   const lista = document.getElementById("listaPartidas");
   lista.innerHTML = "";
 
-  const snap = await db.collection("peladas")
-    .doc(peladaAtualId)
-    .collection("partidas")
-    .orderBy("data", "desc")
-    .get();
+  const q = query(
+    collection(db, "peladas", peladaAtualId, "partidas"),
+    orderBy("data", "desc")
+  );
+
+  const snap = await getDocs(q);
 
   snap.forEach(doc => {
     const p = doc.data();
     lista.innerHTML += `
-      <div class="card">
-        <strong>${p.golsA} x ${p.golsB}</strong><br>
-        ${p.timeA.join(", ")} vs ${p.timeB.join(", ")}
-      </div>
-    `;
+      <div class="p-2 bg-zinc-800 mt-2">
+        ${p.golsA} x ${p.golsB}
+      </div>`;
   });
 }
