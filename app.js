@@ -1,6 +1,6 @@
-alert("app.js carregado com sucesso");
+console.log("app.js carregado");
 
-// FIREBASE CONFIG
+// 🔥 Firebase config (SUAS CHAVES)
 const firebaseConfig = {
   apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
   authDomain: "ousadia-alegria-3269f.firebaseapp.com",
@@ -11,156 +11,181 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// DOM
+// UI
 const loginSection = document.getElementById("loginSection");
-const peladasSection = document.getElementById("peladasSection");
+const appSection = document.getElementById("appSection");
 const peladaSection = document.getElementById("peladaSection");
-const listaPeladas = document.getElementById("listaPeladas");
-const listaJogadores = document.getElementById("listaJogadores");
-const peladaTitulo = document.getElementById("peladaTitulo");
-const timesDiv = document.getElementById("times");
 
-// STATE
-let usuarioAtual = null;
-let peladaAtualId = null;
-let jogadoresConfirmados = [];
+let usuario;
+let peladaAtualId;
+let ultimoTimeA = [];
+let ultimoTimeB = [];
 
-// AUTH
+// 🔐 AUTH
 auth.onAuthStateChanged(user => {
   if (user) {
-    usuarioAtual = user;
-    loginSection.classList.add("hidden");
-    peladasSection.classList.remove("hidden");
+    usuario = user;
+    loginSection.style.display = "none";
+    appSection.style.display = "block";
     carregarPeladas();
-  } else {
-    loginSection.classList.remove("hidden");
-    peladasSection.classList.add("hidden");
-    peladaSection.classList.add("hidden");
   }
 });
 
-// LOGIN
 window.login = async () => {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+
   try {
-    await auth.signInWithEmailAndPassword(email.value, senha.value);
+    await auth.signInWithEmailAndPassword(email, senha);
   } catch {
-    await auth.createUserWithEmailAndPassword(email.value, senha.value);
+    await auth.createUserWithEmailAndPassword(email, senha);
   }
 };
 
 window.logout = () => auth.signOut();
 
-// PELADAS
-function carregarPeladas() {
-  db.collection("peladas")
-    .where("ownerId", "==", usuarioAtual.uid)
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
-      listaPeladas.innerHTML = "";
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        listaPeladas.innerHTML += `
-          <div class="card">
-            <strong>${p.nome}</strong>
-            <button onclick="entrarPelada('${doc.id}','${p.nome}')">Entrar</button>
-          </div>`;
-      });
-    });
+// 🏟️ PELADAS
+async function carregarPeladas() {
+  const lista = document.getElementById("listaPeladas");
+  lista.innerHTML = "";
+
+  const snap = await db.collection("peladas")
+    .where("ownerId", "==", usuario.uid)
+    .get();
+
+  snap.forEach(doc => {
+    lista.innerHTML += `
+      <div class="card">
+        ${doc.data().nome}
+        <button onclick="abrirPelada('${doc.id}', '${doc.data().nome}')">Abrir</button>
+      </div>
+    `;
+  });
 }
 
 window.criarPelada = async () => {
+  const nome = document.getElementById("nomePelada").value;
+  if (!nome) return;
+
   await db.collection("peladas").add({
-    nome: novaPelada.value,
-    ownerId: usuarioAtual.uid,
+    nome,
+    ownerId: usuario.uid,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
-  novaPelada.value = "";
+
+  document.getElementById("nomePelada").value = "";
+  carregarPeladas();
 };
 
-// ENTRAR
-window.entrarPelada = (id, nome) => {
+window.abrirPelada = async (id, nome) => {
   peladaAtualId = id;
-  peladaTitulo.innerText = nome;
-  peladasSection.classList.add("hidden");
-  peladaSection.classList.remove("hidden");
-  timesDiv.innerHTML = "";
+  appSection.style.display = "none";
+  peladaSection.style.display = "block";
+  document.getElementById("tituloPelada").innerText = nome;
   carregarJogadores();
+  carregarHistorico();
 };
 
 window.voltarPeladas = () => {
-  peladaSection.classList.add("hidden");
-  peladasSection.classList.remove("hidden");
+  peladaSection.style.display = "none";
+  appSection.style.display = "block";
 };
 
-// JOGADORES
-function carregarJogadores() {
-  db.collection("peladas")
+// 👥 JOGADORES
+async function carregarJogadores() {
+  const lista = document.getElementById("listaJogadores");
+  lista.innerHTML = "";
+
+  const snap = await db.collection("peladas")
     .doc(peladaAtualId)
     .collection("jogadores")
-    .orderBy("nome")
-    .onSnapshot(snapshot => {
-      listaJogadores.innerHTML = "";
-      jogadoresConfirmados = [];
+    .get();
 
-      snapshot.forEach(doc => {
-        const j = doc.data();
-        if (j.confirmado) jogadoresConfirmados.push(j.nome);
-
-        listaJogadores.innerHTML += `
-          <div class="card ${j.confirmado ? "presente" : "ausente"}">
-            <strong>${j.nome}</strong>
-            <button onclick="togglePresenca('${doc.id}', ${j.confirmado})">
-              ${j.confirmado ? "Presente" : "Ausente"}
-            </button>
-          </div>`;
-      });
-    });
+  snap.forEach(doc => {
+    lista.innerHTML += `<div>${doc.data().nome}</div>`;
+  });
 }
 
-window.criarJogador = async () => {
+window.adicionarJogador = async () => {
+  const nome = document.getElementById("nomeJogador").value;
+  if (!nome) return;
+
   await db.collection("peladas")
     .doc(peladaAtualId)
     .collection("jogadores")
-    .add({
-      nome: novoJogador.value,
-      confirmado: true,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  novoJogador.value = "";
+    .add({ nome });
+
+  document.getElementById("nomeJogador").value = "";
+  carregarJogadores();
 };
 
-window.togglePresenca = async (id, atual) => {
-  await db.collection("peladas")
+// ⚽ TIMES
+window.gerarTimes = async () => {
+  const snap = await db.collection("peladas")
     .doc(peladaAtualId)
     .collection("jogadores")
-    .doc(id)
-    .update({ confirmado: !atual });
-};
+    .get();
 
-// TIMES
-window.gerarTimes = () => {
-  if (jogadoresConfirmados.length < 2) {
-    alert("Poucos jogadores confirmados");
-    return;
-  }
+  let jogadores = snap.docs.map(d => d.data().nome);
+  jogadores.sort(() => Math.random() - 0.5);
 
-  const embaralhado = [...jogadoresConfirmados].sort(() => Math.random() - 0.5);
-  const meio = Math.ceil(embaralhado.length / 2);
+  const meio = Math.ceil(jogadores.length / 2);
+  ultimoTimeA = jogadores.slice(0, meio);
+  ultimoTimeB = jogadores.slice(meio);
 
-  const timeA = embaralhado.slice(0, meio);
-  const timeB = embaralhado.slice(meio);
-
-  timesDiv.innerHTML = `
-    <div class="card time">
-      <h3>Time A</h3>
-      ${timeA.map(j => `<div>${j}</div>`).join("")}
-    </div>
-    <div class="card time">
-      <h3>Time B</h3>
-      ${timeB.map(j => `<div>${j}</div>`).join("")}
-    </div>
+  document.getElementById("timesSection").innerHTML = `
+    <div class="card"><strong>Time A:</strong><br>${ultimoTimeA.join(", ")}</div>
+    <div class="card"><strong>Time B:</strong><br>${ultimoTimeB.join(", ")}</div>
   `;
+
+  document.getElementById("placarSection").style.display = "block";
 };
+
+// 🧾 PARTIDAS
+window.salvarPartida = async () => {
+  const golsA = Number(document.getElementById("golsA").value);
+  const golsB = Number(document.getElementById("golsB").value);
+
+  if (isNaN(golsA) || isNaN(golsB)) return;
+
+  await db.collection("peladas")
+    .doc(peladaAtualId)
+    .collection("partidas")
+    .add({
+      timeA: ultimoTimeA,
+      timeB: ultimoTimeB,
+      golsA,
+      golsB,
+      data: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+  document.getElementById("golsA").value = "";
+  document.getElementById("golsB").value = "";
+
+  carregarHistorico();
+};
+
+async function carregarHistorico() {
+  const lista = document.getElementById("listaPartidas");
+  lista.innerHTML = "";
+
+  const snap = await db.collection("peladas")
+    .doc(peladaAtualId)
+    .collection("partidas")
+    .orderBy("data", "desc")
+    .get();
+
+  snap.forEach(doc => {
+    const p = doc.data();
+    lista.innerHTML += `
+      <div class="card">
+        <strong>${p.golsA} x ${p.golsB}</strong><br>
+        ${p.timeA.join(", ")} vs ${p.timeB.join(", ")}
+      </div>
+    `;
+  });
+}
