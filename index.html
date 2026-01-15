@@ -2,164 +2,91 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <title>Peladas+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resenha Pro</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 30px;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: white;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+    }
+
+    .confirmado {
+      background: #d1fae5;
+      color: #065f46;
+      font-weight: bold;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">
+<body>
 
-  <!-- LOGIN -->
-  <div id="login" class="w-full max-w-sm space-y-4">
-    <h1 class="text-2xl font-bold text-center">Resenha Pro</h1>
+<h1>Peladas+</h1>
 
-    <input id="email" type="email" placeholder="Email"
-      class="w-full p-3 rounded bg-zinc-800" />
+<section id="loginSection">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email" />
+  <input id="senha" type="password" placeholder="Senha" />
+  <button onclick="login()">Entrar / Criar conta</button>
+</section>
 
-    <input id="password" type="password" placeholder="Senha"
-      class="w-full p-3 rounded bg-zinc-800" />
+<section id="appSection" class="hidden">
 
-    <button id="btnCadastrar"
-      class="w-full p-3 bg-green-600 rounded">
-      Criar Conta
-    </button>
+  <button onclick="logout()">Sair</button>
 
-    <button id="btnLogin"
-      class="w-full p-3 bg-blue-600 rounded">
-      Entrar
-    </button>
+  <h2>Criar Pelada</h2>
+  <input id="dataPelada" type="date" />
+  <button onclick="criarPelada()">Criar</button>
 
-    <pre id="loginMsg" class="text-sm"></pre>
-  </div>
+  <h2>Minhas Peladas</h2>
+  <ul id="listaPeladas"></ul>
 
-  <!-- APP -->
-  <div id="app" class="hidden w-full max-w-md space-y-4">
-    <h2 class="text-xl font-bold text-center">Minhas Peladas</h2>
+  <h2>Jogadores</h2>
+  <input id="nomeJogador" placeholder="Seu nome na pelada" />
+  <button onclick="entrarPelada()">Entrar na pelada</button>
 
-    <button id="btnCriar"
-      class="w-full p-3 bg-green-600 rounded">
-      Criar Pelada
-    </button>
+  <ul id="listaJogadores"></ul>
 
-    <button id="btnListar"
-      class="w-full p-3 bg-blue-600 rounded">
-      Listar Peladas
-    </button>
+</section>
 
-    <button id="btnLogout"
-      class="w-full p-3 bg-red-600 rounded">
-      Sair
-    </button>
-
-    <pre id="output" class="text-sm bg-black p-3 rounded"></pre>
-  </div>
-
-  <script type="module">
-    import { auth, db } from "./firebase.js";
-    import {
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-    import {
-      collection,
-      addDoc,
-      getDocs,
-      query,
-      where,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    const loginDiv = document.getElementById("login");
-    const appDiv = document.getElementById("app");
-    const output = document.getElementById("output");
-    const loginMsg = document.getElementById("loginMsg");
-
-    let usuarioAtual = null;
-
-    // OBSERVA LOGIN
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        usuarioAtual = user;
-        loginDiv.classList.add("hidden");
-        appDiv.classList.remove("hidden");
-      } else {
-        usuarioAtual = null;
-        loginDiv.classList.remove("hidden");
-        appDiv.classList.add("hidden");
-      }
-    });
-
-    // CADASTRO
-    btnCadastrar.onclick = async () => {
-      try {
-        await createUserWithEmailAndPassword(
-          auth,
-          email.value,
-          password.value
-        );
-        loginMsg.textContent = "Conta criada!";
-      } catch (e) {
-        loginMsg.textContent = e.message;
-      }
-    };
-
-    // LOGIN
-    btnLogin.onclick = async () => {
-      try {
-        await signInWithEmailAndPassword(
-          auth,
-          email.value,
-          password.value
-        );
-        loginMsg.textContent = "Login realizado!";
-      } catch (e) {
-        loginMsg.textContent = e.message;
-      }
-    };
-
-    // LOGOUT
-    btnLogout.onclick = async () => {
-      await signOut(auth);
-    };
-
-    // CRIAR PELADA
-    btnCriar.onclick = async () => {
-      try {
-        await addDoc(collection(db, "peladas"), {
-          nome: "Pelada do " + usuarioAtual.email,
-          ownerId: usuarioAtual.uid,
-          criadaEm: serverTimestamp()
-        });
-        output.textContent = "Pelada criada!";
-      } catch (e) {
-        output.textContent = e.message;
-      }
-    };
-
-    // LISTAR PELADAS DO USUÁRIO
-    btnListar.onclick = async () => {
-      try {
-        const q = query(
-          collection(db, "peladas"),
-          where("ownerId", "==", usuarioAtual.uid)
-        );
-
-        const snapshot = await getDocs(q);
-        let texto = "Suas peladas:\n\n";
-
-        snapshot.forEach(doc => {
-          texto += doc.data().nome + "\n";
-        });
-
-        output.textContent = texto || "Nenhuma pelada encontrada.";
-      } catch (e) {
-        output.textContent = e.message;
-      }
-    };
-  </script>
-
+<script type="module" src="app.js"></script>
 </body>
 </html>
