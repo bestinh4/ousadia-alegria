@@ -4,26 +4,67 @@
   <meta charset="UTF-8" />
   <title>Peladas+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    section {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
 
-  <h1>Peladas+</h1>
+  <!-- LOGIN -->
+  <section id="loginSection">
+    <h1>Peladas+</h1>
 
-  <input id="email" type="email" placeholder="Email" />
-  <br /><br />
-  <input id="senha" type="password" placeholder="Senha" />
-  <br /><br />
+    <input id="email" type="email" placeholder="Email" />
+    <input id="senha" type="password" placeholder="Senha" />
 
-  <button onclick="login()">Entrar / Criar conta</button>
+    <button id="loginBtn">Entrar / Criar conta</button>
+  </section>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- APP -->
+  <section id="appSection" style="display:none">
+    <h1>Minhas Peladas</h1>
 
-  <!-- Seus scripts -->
-  <script src="firebase.js"></script>
-  <script src="app.js"></script>
+    <input id="nomePelada" placeholder="Nome da pelada" />
+    <button id="criarPeladaBtn">Criar pelada</button>
 
+    <ul id="listaPeladas"></ul>
+
+    <button id="logoutBtn">Sair</button>
+  </section>
+
+  <!-- SCRIPT -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
