@@ -8,7 +8,6 @@ const firebaseConfig = {
   appId: "1:695364420342:web:aa130dfa6e019a271b22d7"
 };
 
-// ===== INIT =====
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -17,7 +16,6 @@ const db = firebase.firestore();
 const loginSection = document.getElementById("loginSection");
 const peladasSection = document.getElementById("peladasSection");
 const peladaSection = document.getElementById("peladaSection");
-
 const listaPeladas = document.getElementById("listaPeladas");
 const listaJogadores = document.getElementById("listaJogadores");
 const peladaTitulo = document.getElementById("peladaTitulo");
@@ -34,7 +32,6 @@ auth.onAuthStateChanged(user => {
     peladasSection.classList.remove("hidden");
     carregarPeladas();
   } else {
-    usuarioAtual = null;
     loginSection.classList.remove("hidden");
     peladasSection.classList.add("hidden");
     peladaSection.classList.add("hidden");
@@ -45,12 +42,6 @@ auth.onAuthStateChanged(user => {
 window.login = async function () {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
-
-  if (!email || !senha) {
-    alert("Preencha email e senha");
-    return;
-  }
-
   try {
     await auth.signInWithEmailAndPassword(email, senha);
   } catch {
@@ -58,10 +49,7 @@ window.login = async function () {
   }
 };
 
-// ===== LOGOUT =====
-window.logout = function () {
-  auth.signOut();
-};
+window.logout = () => auth.signOut();
 
 // ===== PELADAS =====
 function carregarPeladas() {
@@ -70,48 +58,37 @@ function carregarPeladas() {
     .orderBy("createdAt", "desc")
     .onSnapshot(snapshot => {
       listaPeladas.innerHTML = "";
-
       snapshot.forEach(doc => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `
-          <strong>${doc.data().nome}</strong>
-          <button onclick="entrarPelada('${doc.id}', '${doc.data().nome}')">
-            Entrar
-          </button>
-        `;
-        listaPeladas.appendChild(div);
+        const d = doc.data();
+        listaPeladas.innerHTML += `
+          <div class="card">
+            <strong>${d.nome}</strong>
+            <button onclick="entrarPelada('${doc.id}','${d.nome}')">Entrar</button>
+          </div>`;
       });
     });
 }
 
-window.criarPelada = async function () {
-  const nome = document.getElementById("novaPelada").value;
-
-  if (!nome) return alert("Informe o nome");
-
+window.criarPelada = async () => {
+  const nome = novaPelada.value;
   await db.collection("peladas").add({
     nome,
     ownerId: usuarioAtual.uid,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
-
-  document.getElementById("novaPelada").value = "";
+  novaPelada.value = "";
 };
 
-// ===== ENTRAR NA PELADA =====
-window.entrarPelada = function (id, nome) {
+// ===== ENTRAR =====
+window.entrarPelada = (id, nome) => {
   peladaAtualId = id;
   peladaTitulo.innerText = nome;
-
   peladasSection.classList.add("hidden");
   peladaSection.classList.remove("hidden");
-
   carregarJogadores();
 };
 
-window.voltarPeladas = function () {
-  peladaAtualId = null;
+window.voltarPeladas = () => {
   peladaSection.classList.add("hidden");
   peladasSection.classList.remove("hidden");
 };
@@ -124,29 +101,36 @@ function carregarJogadores() {
     .orderBy("nome")
     .onSnapshot(snapshot => {
       listaJogadores.innerHTML = "";
-
       snapshot.forEach(doc => {
-        const jogador = doc.data();
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerText = jogador.nome;
-        listaJogadores.appendChild(div);
+        const j = doc.data();
+        listaJogadores.innerHTML += `
+          <div class="card ${j.confirmado ? "confirmado" : ""}">
+            <strong>${j.nome}</strong>
+            <button onclick="togglePresenca('${doc.id}', ${j.confirmado})">
+              ${j.confirmado ? "Confirmado" : "Confirmar"}
+            </button>
+          </div>`;
       });
     });
 }
 
-window.criarJogador = async function () {
-  const nome = document.getElementById("novoJogador").value;
-
-  if (!nome) return alert("Informe o nome do jogador");
-
+window.criarJogador = async () => {
+  const nome = novoJogador.value;
   await db.collection("peladas")
     .doc(peladaAtualId)
     .collection("jogadores")
     .add({
       nome,
+      confirmado: true,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+  novoJogador.value = "";
+};
 
-  document.getElementById("novoJogador").value = "";
+window.togglePresenca = async (id, atual) => {
+  await db.collection("peladas")
+    .doc(peladaAtualId)
+    .collection("jogadores")
+    .doc(id)
+    .update({ confirmado: !atual });
 };
