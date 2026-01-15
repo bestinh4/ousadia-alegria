@@ -5,7 +5,6 @@
   <title>Peladas+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -14,39 +13,38 @@
     body { font-family: Arial, sans-serif; background: #f4f6f8; padding: 20px; }
     input, button { width: 100%; padding: 10px; margin: 6px 0; }
     .hidden { display: none; }
-    .card { background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 8px; }
-    .confirmado { background: #d1fae5; }
+    .card { padding: 12px; border-radius: 6px; margin-bottom: 8px; }
+    .presente { background: #d1fae5; }
+    .ausente { background: #e5e7eb; }
+    .status { font-size: 14px; margin-top: 6px; }
   </style>
 </head>
 
 <body>
 
-  <!-- LOGIN -->
-  <section id="loginSection">
-    <h2>Login</h2>
-    <input id="email" placeholder="Email" />
-    <input id="senha" type="password" placeholder="Senha" />
-    <button onclick="login()">Entrar / Criar conta</button>
-  </section>
+<section id="loginSection">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email">
+  <input id="senha" type="password" placeholder="Senha">
+  <button onclick="login()">Entrar / Criar conta</button>
+</section>
 
-  <!-- PELADAS -->
-  <section id="peladasSection" class="hidden">
-    <h2>Minhas Peladas</h2>
-    <input id="novaPelada" placeholder="Nome da pelada" />
-    <button onclick="criarPelada()">Criar pelada</button>
-    <div id="listaPeladas"></div>
-    <button onclick="logout()">Sair</button>
-  </section>
+<section id="peladasSection" class="hidden">
+  <h2>Minhas Peladas</h2>
+  <input id="novaPelada" placeholder="Nome da pelada">
+  <button onclick="criarPelada()">Criar pelada</button>
+  <div id="listaPeladas"></div>
+  <button onclick="logout()">Sair</button>
+</section>
 
-  <!-- PELADA -->
-  <section id="peladaSection" class="hidden">
-    <h2 id="peladaTitulo"></h2>
-    <input id="novoJogador" placeholder="Nome do jogador" />
-    <button onclick="criarJogador()">Adicionar jogador</button>
-    <div id="listaJogadores"></div>
-    <button onclick="voltarPeladas()">Voltar</button>
-  </section>
+<section id="peladaSection" class="hidden">
+  <h2 id="peladaTitulo"></h2>
+  <input id="novoJogador" placeholder="Nome do jogador">
+  <button onclick="criarJogador()">Adicionar jogador</button>
+  <div id="listaJogadores"></div>
+  <button onclick="voltarPeladas()">Voltar</button>
+</section>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
