@@ -11,8 +11,4 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.db = db;
-
-console.log("Firestore conectado com sucesso");
+export const db = getFirestore(app);
