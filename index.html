@@ -11,33 +11,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 20px;
-    }
-    h2 {
-      margin-top: 0;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      font-size: 16px;
-    }
-    button {
-      cursor: pointer;
-    }
-    .hidden {
-      display: none;
-    }
-    .card {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+    body { font-family: Arial, sans-serif; background: #f4f6f8; padding: 20px; }
+    input, button { width: 100%; padding: 10px; margin: 6px 0; }
+    .hidden { display: none; }
+    .card { background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 8px; }
+    .confirmado { background: #d1fae5; }
   </style>
 </head>
 
@@ -46,37 +24,29 @@
   <!-- LOGIN -->
   <section id="loginSection">
     <h2>Login</h2>
-    <input id="email" type="email" placeholder="Email" />
+    <input id="email" placeholder="Email" />
     <input id="senha" type="password" placeholder="Senha" />
     <button onclick="login()">Entrar / Criar conta</button>
   </section>
 
-  <!-- LISTA DE PELADAS -->
+  <!-- PELADAS -->
   <section id="peladasSection" class="hidden">
     <h2>Minhas Peladas</h2>
-
     <input id="novaPelada" placeholder="Nome da pelada" />
     <button onclick="criarPelada()">Criar pelada</button>
-
     <div id="listaPeladas"></div>
-
     <button onclick="logout()">Sair</button>
   </section>
 
-  <!-- TELA DA PELADA -->
+  <!-- PELADA -->
   <section id="peladaSection" class="hidden">
     <h2 id="peladaTitulo"></h2>
-
     <input id="novoJogador" placeholder="Nome do jogador" />
     <button onclick="criarJogador()">Adicionar jogador</button>
-
     <div id="listaJogadores"></div>
-
     <button onclick="voltarPeladas()">Voltar</button>
   </section>
 
-  <!-- APP -->
   <script src="app.js"></script>
-
 </body>
 </html>
