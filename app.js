@@ -206,3 +206,59 @@ async function carregarHistorico() {
       </div>`;
   });
 }
+
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+window.carregarHistorico = async function () {
+  const historicoSection = document.getElementById("historicoSection");
+  const lista = document.getElementById("listaHistorico");
+
+  lista.innerHTML = "";
+  historicoSection.classList.remove("hidden");
+
+  const partidasRef = collection(db, "peladas", peladaSelecionadaId, "partidas");
+  const q = query(partidasRef, orderBy("criadaEm", "desc"));
+
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    lista.innerHTML = "<li>Nenhuma partida registrada.</li>";
+    return;
+  }
+
+  snapshot.forEach(doc => {
+    const p = doc.data();
+
+    const li = document.createElement("li");
+    li.className = "bg-white p-4 rounded shadow";
+
+    li.innerHTML = `
+      <div class="font-semibold mb-1">
+        ${p.placarA} x ${p.placarB}
+      </div>
+
+      <div class="text-sm text-gray-600 mb-2">
+        ${new Date(p.criadaEm.seconds * 1000).toLocaleDateString()}
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <strong>Time A</strong>
+          <ul>${p.timeA.map(j => `<li>${j}</li>`).join("")}</ul>
+        </div>
+        <div>
+          <strong>Time B</strong>
+          <ul>${p.timeB.map(j => `<li>${j}</li>`).join("")}</ul>
+        </div>
+      </div>
+    `;
+
+    lista.appendChild(li);
+  });
+};
+
