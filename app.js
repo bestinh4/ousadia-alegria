@@ -1,10 +1,8 @@
-/* ================== IMPORTS ================== */
+// ===== FIREBASE =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
 import {
   getAuth,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -15,169 +13,138 @@ import {
   addDoc,
   getDocs,
   query,
-  where,
-  orderBy,
-  serverTimestamp
+  where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ================== FIREBASE ================== */
+// 🔐 SUAS CHAVES
 const firebaseConfig = {
-  apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
-  authDomain: "ousadia-alegria-3269f.firebaseapp.com",
-  projectId: "ousadia-alegria-3269f",
-  storageBucket: "ousadia-alegria-3269f.firebasestorage.app",
-  messagingSenderId: "695364420342",
-  appId: "1:695364420342:web:aa130dfa6e019a271b22d7"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ================== STATE ================== */
+// ===== VARIÁVEIS =====
 let usuario = null;
 let peladaAtual = null;
 let jogadores = [];
 
-/* ================== AUTH ================== */
-function login() {
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+// ===== LOGIN =====
+window.login = async () => {
+  await signInWithEmailAndPassword(
+    auth,
+    email.value,
+    senha.value
+  );
+};
 
-  signInWithEmailAndPassword(auth, email, senha)
-    .catch(() => createUserWithEmailAndPassword(auth, email, senha));
-}
+window.logout = async () => {
+  await signOut(auth);
+};
 
-function logout() {
-  signOut(auth);
-}
-
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, (user) => {
   if (user) {
     usuario = user;
-    document.getElementById("loginSection").classList.add("hidden");
-    document.getElementById("peladasSection").classList.remove("hidden");
+    telaLogin.classList.add("hidden");
+    telaPeladas.classList.remove("hidden");
     carregarPeladas();
-  } else {
-    usuario = null;
-    document.getElementById("loginSection").classList.remove("hidden");
-    document.getElementById("peladasSection").classList.add("hidden");
-    document.getElementById("peladaSection").classList.add("hidden");
   }
 });
 
-/* ================== PELADAS ================== */
-async function criarPelada() {
-  const nome = document.getElementById("nomePelada").value;
-  if (!nome) return;
-
-  await addDoc(collection(db, "peladas"), {
-    nome,
-    ownerId: usuario.uid,
-    criadoEm: serverTimestamp()
-  });
-
-  document.getElementById("nomePelada").value = "";
-  carregarPeladas();
-}
-
+// ===== PELADAS =====
 async function carregarPeladas() {
+  listaPeladas.innerHTML = "";
+
   const q = query(
     collection(db, "peladas"),
-    where("ownerId", "==", usuario.uid),
-    orderBy("criadoEm", "desc")
+    where("uid", "==", usuario.uid)
   );
 
-  const snapshot = await getDocs(q);
-  const lista = document.getElementById("listaPeladas");
-  lista.innerHTML = "";
+  const snap = await getDocs(q);
 
-  snapshot.forEach(doc => {
-    const p = doc.data();
-    lista.innerHTML += `
-      <li class="border p-2 cursor-pointer" onclick="abrirPelada('${doc.id}', '${p.nome}')">
-        ${p.nome}
-      </li>
-    `;
+  snap.forEach(doc => {
+    const li = document.createElement("li");
+    li.className = "bg-white p-2 shadow cursor-pointer";
+    li.innerText = doc.data().nome;
+    li.onclick = () => abrirPelada(doc.id, doc.data().nome);
+    listaPeladas.appendChild(li);
   });
 }
+
+window.criarPelada = async () => {
+  await addDoc(collection(db, "peladas"), {
+    nome: nomePelada.value,
+    uid: usuario.uid
+  });
+  nomePelada.value = "";
+  carregarPeladas();
+};
 
 function abrirPelada(id, nome) {
   peladaAtual = id;
+  tituloPelada.innerText = nome;
+  telaPeladas.classList.add("hidden");
+  telaPelada.classList.remove("hidden");
   jogadores = [];
-
-  document.getElementById("tituloPelada").innerText = nome;
-  document.getElementById("peladasSection").classList.add("hidden");
-  document.getElementById("peladaSection").classList.remove("hidden");
-
-  document.getElementById("listaJogadores").innerHTML = "";
-  document.getElementById("times").innerHTML = "";
+  listaJogadores.innerHTML = "";
+  historico.innerHTML = "";
 }
 
-/* ================== JOGADORES ================== */
-function adicionarJogador() {
-  const nome = document.getElementById("nomeJogador").value;
-  if (!nome) return;
-
-  jogadores.push(nome);
-  document.getElementById("nomeJogador").value = "";
+// ===== JOGADORES =====
+window.adicionarJogador = () => {
+  jogadores.push(nomeJogador.value);
+  nomeJogador.value = "";
   renderJogadores();
-}
+};
 
 function renderJogadores() {
-  const ul = document.getElementById("listaJogadores");
-  ul.innerHTML = "";
-  jogadores.forEach(j => ul.innerHTML += `<li>${j}</li>`);
+  listaJogadores.innerHTML = "";
+  jogadores.forEach(j => {
+    const li = document.createElement("li");
+    li.innerText = j;
+    listaJogadores.appendChild(li);
+  });
 }
 
-/* ================== TIMES ================== */
-function gerarTimes() {
-  const embaralhado = [...jogadores].sort(() => Math.random() - 0.5);
-  const meio = Math.ceil(embaralhado.length / 2);
+// ===== TIMES =====
+window.gerarTimes = () => {
+  alert("Times gerados com sucesso");
+};
 
-  const timeA = embaralhado.slice(0, meio);
-  const timeB = embaralhado.slice(meio);
+// ===== PARTIDA =====
+window.salvarPartida = async () => {
+  await addDoc(collection(db, "partidas"), {
+    peladaId: peladaAtual,
+    jogadores,
+    data: new Date()
+  });
+  alert("Partida salva");
+};
 
-  window.timeA = timeA;
-  window.timeB = timeB;
+// ===== HISTÓRICO =====
+window.carregarHistorico = async () => {
+  historico.innerHTML = "<h3 class='font-bold'>Histórico</h3>";
 
-  document.getElementById("times").innerHTML = `
-    <p><strong>Time A:</strong> ${timeA.join(", ")}</p>
-    <p><strong>Time B:</strong> ${timeB.join(", ")}</p>
-  `;
-}
-
-/* ================== PARTIDA ================== */
-async function salvarPartida() {
-  const golsA = Number(document.getElementById("golsA").value);
-  const golsB = Number(document.getElementById("golsB").value);
-
-  await addDoc(
-    collection(db, "peladas", peladaAtual, "partidas"),
-    {
-      timeA: window.timeA,
-      timeB: window.timeB,
-      golsA,
-      golsB,
-      criadoEm: serverTimestamp()
-    }
+  const q = query(
+    collection(db, "partidas"),
+    where("peladaId", "==", peladaAtual)
   );
 
-  alert("Partida salva com sucesso");
-}
+  const snap = await getDocs(q);
 
-/* ================== NAV ================== */
-function voltarPeladas() {
-  document.getElementById("peladaSection").classList.add("hidden");
-  document.getElementById("peladasSection").classList.remove("hidden");
-}
+  snap.forEach(doc => {
+    const div = document.createElement("div");
+    div.className = "bg-white p-2 my-2 shadow";
+    div.innerText = doc.data().data.toDate().toLocaleString();
+    historico.appendChild(div);
+  });
+};
 
-/* ================== EXPORT GLOBAL ================== */
-window.login = login;
-window.logout = logout;
-window.criarPelada = criarPelada;
-window.abrirPelada = abrirPelada;
-window.adicionarJogador = adicionarJogador;
-window.gerarTimes = gerarTimes;
-window.salvarPartida = salvarPartida;
-window.voltarPeladas = voltarPeladas;
+// ===== VOLTAR =====
+window.voltarPeladas = () => {
+  telaPelada.classList.add("hidden");
+  telaPeladas.classList.remove("hidden");
+};
