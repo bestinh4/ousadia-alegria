@@ -2,67 +2,51 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ousadia & Alegria</title>
+  <title>Pelada</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Tailwind CDN (ok para MVP/testes) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 p-4">
 
+  <h1 class="text-2xl font-bold mb-4">Gerenciador de Pelada</h1>
+
   <!-- LOGIN -->
-  <section id="loginSection" class="max-w-md mx-auto bg-white p-4 rounded shadow">
-    <h2 class="text-xl font-bold mb-2">Login</h2>
-    <input id="email" class="border p-2 w-full mb-2" placeholder="Email" />
-    <input id="senha" type="password" class="border p-2 w-full mb-2" placeholder="Senha" />
-    <button onclick="login()" class="bg-blue-600 text-white w-full py-2">Entrar / Cadastrar</button>
-  </section>
+  <div id="tela-login" class="space-y-2">
+    <input id="email" class="border p-2 w-full" placeholder="Email">
+    <input id="senha" type="password" class="border p-2 w-full" placeholder="Senha">
+    <button onclick="login()" class="bg-blue-600 text-white p-2 w-full">Entrar</button>
+  </div>
 
   <!-- PELADAS -->
-  <section id="peladasSection" class="hidden max-w-md mx-auto bg-white p-4 rounded shadow mt-4">
+  <div id="tela-peladas" class="hidden">
     <h2 class="text-xl font-bold mb-2">Minhas Peladas</h2>
 
-    <input id="nomePelada" class="border p-2 w-full mb-2" placeholder="Nome da pelada" />
-    <button onclick="criarPelada()" class="bg-green-600 text-white w-full py-2 mb-3">
-      Criar Pelada
-    </button>
+    <input id="nomePelada" class="border p-2 w-full mb-2" placeholder="Nome da pelada">
+    <button onclick="criarPelada()" class="bg-green-600 text-white p-2 w-full mb-4">Criar Pelada</button>
 
     <ul id="listaPeladas" class="space-y-2"></ul>
 
-    <button onclick="logout()" class="text-red-600 mt-4">Sair</button>
-  </section>
+    <button onclick="logout()" class="mt-4 bg-red-600 text-white p-2 w-full">Sair</button>
+  </div>
 
-  <!-- TELA DA PELADA -->
-  <section id="peladaSection" class="hidden max-w-md mx-auto bg-white p-4 rounded shadow mt-4">
+  <!-- PELADA DETALHE -->
+  <div id="tela-pelada" class="hidden">
     <h2 id="tituloPelada" class="text-xl font-bold mb-2"></h2>
 
-    <input id="nomeJogador" class="border p-2 w-full mb-2" placeholder="Nome do jogador" />
-    <button onclick="adicionarJogador()" class="bg-blue-600 text-white w-full py-2 mb-3">
-      Adicionar Jogador
-    </button>
+    <input id="nomeJogador" class="border p-2 w-full mb-2" placeholder="Nome do jogador">
+    <button onclick="adicionarJogador()" class="bg-green-600 text-white p-2 w-full">Adicionar Jogador</button>
 
-    <ul id="listaJogadores" class="space-y-1 mb-3"></ul>
+    <ul id="listaJogadores" class="my-4"></ul>
 
-    <button onclick="gerarTimes()" class="bg-purple-600 text-white w-full py-2 mb-2">
-      Gerar Times
-    </button>
+    <button onclick="gerarTimes()" class="bg-blue-600 text-white p-2 w-full mb-2">Gerar Times</button>
+    <button onclick="salvarPartida()" class="bg-purple-600 text-white p-2 w-full mb-2">Salvar Partida</button>
+    <button onclick="carregarHistorico()" class="bg-gray-700 text-white p-2 w-full mb-2">Histórico</button>
+    <button onclick="voltarPeladas()" class="bg-gray-400 p-2 w-full">Voltar</button>
 
-    <div id="times" class="mb-2"></div>
-
-    <div class="flex gap-2 mb-2">
-      <input id="golsA" type="number" class="border p-2 w-1/2" placeholder="Gols Time A" />
-      <input id="golsB" type="number" class="border p-2 w-1/2" placeholder="Gols Time B" />
-    </div>
-
-    <button onclick="salvarPartida()" class="bg-green-700 text-white w-full py-2 mb-2">
-      Salvar Partida
-    </button>
-
-    <button onclick="voltarPeladas()" class="text-blue-600">
-      Voltar
-    </button>
-  </section>
+    <div id="historico" class="mt-4"></div>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>
