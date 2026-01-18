@@ -1,79 +1,70 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Ousadia & Alegria</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Firebase -->
-  <script type="module" src="app.js"></script>
+  <!-- Firebase SDKs (compat para evitar erro de module) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body class="bg-gray-100 p-4">
 
   <!-- LOGIN -->
-  <section id="loginSection" class="max-w-md mx-auto bg-white p-4 rounded shadow">
-    <h2 class="text-xl font-bold mb-4">Login</h2>
-
-    <input id="email" type="email" placeholder="Email" class="border p-2 w-full mb-2">
-    <input id="senha" type="password" placeholder="Senha" class="border p-2 w-full mb-2">
-
-    <button onclick="login()" class="bg-blue-600 text-white p-2 w-full">
-      Entrar / Criar conta
-    </button>
+  <section id="loginSection">
+    <h1 class="text-2xl font-bold mb-2">Login</h1>
+    <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
+    <input id="senha" type="password" class="border p-2 w-full mb-2" placeholder="Senha">
+    <button onclick="login()" class="bg-blue-600 text-white px-4 py-2 w-full">Entrar</button>
   </section>
 
-  <!-- PELADAS -->
-  <section id="peladasSection" class="hidden max-w-md mx-auto bg-white p-4 rounded shadow">
+  <!-- APP -->
+  <section id="appSection" class="hidden">
+
     <h2 class="text-xl font-bold mb-2">Minhas Peladas</h2>
 
-    <input id="nomePelada" placeholder="Nome da pelada" class="border p-2 w-full mb-2">
-    <button onclick="criarPelada()" class="bg-green-600 text-white p-2 w-full mb-2">
-      Criar pelada
-    </button>
+    <input id="nomePelada" class="border p-2 w-full mb-2" placeholder="Nome da pelada">
+    <button onclick="criarPelada()" class="bg-green-600 text-white px-4 py-2 w-full mb-4">Criar Pelada</button>
 
-    <div id="listaPeladas"></div>
+    <ul id="listaPeladas" class="mb-4"></ul>
 
-    <button onclick="logout()" class="bg-red-600 text-white p-2 w-full mt-2">
-      Sair
-    </button>
+    <!-- JOGADORES -->
+    <section id="peladaSection" class="hidden">
+      <h3 id="tituloPelada" class="text-lg font-bold mb-2"></h3>
+
+      <input id="nomeJogador" class="border p-2 w-full mb-2" placeholder="Nome do jogador">
+      <button onclick="adicionarJogador()" class="bg-blue-600 text-white px-4 py-2 w-full mb-2">
+        Adicionar Jogador
+      </button>
+
+      <ul id="listaJogadores" class="mb-4"></ul>
+
+      <button onclick="gerarTimes()" class="bg-purple-600 text-white px-4 py-2 w-full mb-2">
+        Gerar Times
+      </button>
+
+      <div id="timesGerados" class="mb-4"></div>
+
+      <button onclick="salvarPartida()" class="bg-green-700 text-white px-4 py-2 w-full mb-2">
+        Salvar Partida
+      </button>
+
+      <button onclick="carregarEstatisticas()" class="bg-gray-800 text-white px-4 py-2 w-full">
+        Ver Estatísticas
+      </button>
+
+      <div id="estatisticas" class="mt-4"></div>
+
+      <button onclick="voltarPeladas()" class="mt-4 underline">Voltar</button>
+    </section>
+
+    <button onclick="logout()" class="mt-6 underline">Sair</button>
   </section>
 
-  <!-- PELADA DETALHE -->
-  <section id="peladaSection" class="hidden max-w-md mx-auto bg-white p-4 rounded shadow">
-    <h2 id="tituloPelada" class="text-xl font-bold mb-2"></h2>
-
-    <input id="nomeJogador" placeholder="Nome do jogador" class="border p-2 w-full mb-2">
-    <button onclick="adicionarJogador()" class="bg-blue-600 text-white p-2 w-full mb-2">
-      Adicionar jogador
-    </button>
-
-    <ul id="listaJogadores" class="mb-2"></ul>
-
-    <button onclick="gerarTimes()" class="bg-purple-600 text-white p-2 w-full mb-2">
-      Gerar times
-    </button>
-
-    <div id="times"></div>
-
-    <input id="placarA" type="number" placeholder="Placar Time A" class="border p-2 w-full mb-2">
-    <input id="placarB" type="number" placeholder="Placar Time B" class="border p-2 w-full mb-2">
-
-    <button onclick="salvarPartida()" class="bg-green-600 text-white p-2 w-full mb-2">
-      Salvar partida
-    </button>
-
-    <button onclick="carregarRanking()" class="bg-yellow-500 text-white p-2 w-full mb-2">
-      Ver ranking
-    </button>
-
-    <div id="ranking"></div>
-
-    <button onclick="voltarPeladas()" class="bg-gray-600 text-white p-2 w-full mt-2">
-      Voltar
-    </button>
-  </section>
-
+  <script src="app.js"></script>
 </body>
 </html>
