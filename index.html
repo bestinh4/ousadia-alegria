@@ -1,70 +1,58 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <title>Ousadia & Alegria</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Firebase SDKs (compat para evitar erro de module) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-
 <body class="bg-gray-100 p-4">
 
-  <!-- LOGIN -->
-  <section id="loginSection">
-    <h1 class="text-2xl font-bold mb-2">Login</h1>
-    <input id="email" class="border p-2 w-full mb-2" placeholder="Email">
-    <input id="senha" type="password" class="border p-2 w-full mb-2" placeholder="Senha">
-    <button onclick="login()" class="bg-blue-600 text-white px-4 py-2 w-full">Entrar</button>
-  </section>
+<h1 class="text-2xl font-bold text-center mb-4">⚽ Ousadia & Alegria</h1>
 
-  <!-- APP -->
-  <section id="appSection" class="hidden">
+<div id="auth" class="mb-4">
+  <input id="email" type="email" placeholder="Email" class="border p-2 w-full mb-2">
+  <input id="senha" type="password" placeholder="Senha" class="border p-2 w-full mb-2">
+  <button onclick="login()" class="bg-blue-600 text-white p-2 w-full">Entrar</button>
+</div>
 
-    <h2 class="text-xl font-bold mb-2">Minhas Peladas</h2>
+<div id="app" class="hidden">
 
-    <input id="nomePelada" class="border p-2 w-full mb-2" placeholder="Nome da pelada">
-    <button onclick="criarPelada()" class="bg-green-600 text-white px-4 py-2 w-full mb-4">Criar Pelada</button>
+  <p id="userInfo" class="mb-2 font-semibold"></p>
 
-    <ul id="listaPeladas" class="mb-4"></ul>
+  <!-- ADMIN -->
+  <div id="adminPanel" class="hidden mb-4 border p-3 bg-white rounded">
+    <h2 class="font-bold mb-2">Administração</h2>
 
-    <!-- JOGADORES -->
-    <section id="peladaSection" class="hidden">
-      <h3 id="tituloPelada" class="text-lg font-bold mb-2"></h3>
+    <input id="dataPelada" type="datetime-local" class="border p-2 w-full mb-2">
+    <input id="localPelada" placeholder="Local" class="border p-2 w-full mb-2">
+    <button onclick="salvarPelada()" class="bg-green-600 text-white p-2 w-full mb-2">
+      Salvar Pelada
+    </button>
 
-      <input id="nomeJogador" class="border p-2 w-full mb-2" placeholder="Nome do jogador">
-      <button onclick="adicionarJogador()" class="bg-blue-600 text-white px-4 py-2 w-full mb-2">
-        Adicionar Jogador
-      </button>
+    <input id="emailNovoAdmin" placeholder="Email do novo ADM"
+      class="border p-2 w-full mb-2">
+    <button onclick="promoverAdmin()" class="bg-purple-600 text-white p-2 w-full">
+      Tornar ADM
+    </button>
+  </div>
 
-      <ul id="listaJogadores" class="mb-4"></ul>
+  <!-- JOGADOR -->
+  <div class="mb-4 border p-3 bg-white rounded">
+    <button onclick="confirmarPresenca(true)"
+      class="bg-blue-600 text-white p-2 w-full mb-2">
+      Confirmar Presença
+    </button>
+    <button onclick="confirmarPresenca(false)"
+      class="bg-gray-600 text-white p-2 w-full">
+      Cancelar Presença
+    </button>
+  </div>
 
-      <button onclick="gerarTimes()" class="bg-purple-600 text-white px-4 py-2 w-full mb-2">
-        Gerar Times
-      </button>
+  <button onclick="logout()" class="bg-red-600 text-white p-2 w-full">
+    Sair
+  </button>
+</div>
 
-      <div id="timesGerados" class="mb-4"></div>
-
-      <button onclick="salvarPartida()" class="bg-green-700 text-white px-4 py-2 w-full mb-2">
-        Salvar Partida
-      </button>
-
-      <button onclick="carregarEstatisticas()" class="bg-gray-800 text-white px-4 py-2 w-full">
-        Ver Estatísticas
-      </button>
-
-      <div id="estatisticas" class="mt-4"></div>
-
-      <button onclick="voltarPeladas()" class="mt-4 underline">Voltar</button>
-    </section>
-
-    <button onclick="logout()" class="mt-6 underline">Sair</button>
-  </section>
-
-  <script src="app.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
