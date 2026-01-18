@@ -1,202 +1,192 @@
-console.log("app.js carregado como module");
+console.log("app.js carregado");
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-  updateDoc,
-  doc,
-  increment,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-/* CONFIG */
-const firebaseConfig = {
+// 🔥 Firebase
+firebase.initializeApp({
   apiKey: "AIzaSyAK-Mj7fDwCUh9aer3z8swN7hUNIi2FK4E",
   authDomain: "ousadia-alegria-3269f.firebaseapp.com",
-  projectId: "ousadia-alegria-3269f",
-  storageBucket: "ousadia-alegria-3269f.firebasestorage.app",
-  messagingSenderId: "695364420342",
-  appId: "1:695364420342:web:aa130dfa6e019a271b22d7"
-};
+  projectId: "ousadia-alegria-3269f"
+});
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-/* ESTADO */
-let usuario = null;
-let peladaAtual = null;
-let jogadoresAtual = [];
-let timeA = [];
-let timeB = [];
+// 🔐 AUTH
+auth.onAuthStateChanged(user => {
+  loginSection.classList.toggle("hidden", !!user);
+  appSection.classList.toggle("hidden", !user);
+  if (user) carregarPeladas();
+});
 
-/* AUTH */
-window.login = async function () {
+function login() {
   const email = email.value;
   const senha = senha.value;
 
-  try {
-    await signInWithEmailAndPassword(auth, email, senha);
-  } catch {
-    await createUserWithEmailAndPassword(auth, email, senha);
-  }
-};
+  auth.signInWithEmailAndPassword(email, senha)
+    .catch(() => auth.createUserWithEmailAndPassword(email, senha));
+}
 
-window.logout = () => signOut(auth);
+function logout() {
+  auth.signOut();
+}
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    usuario = user;
-    loginSection.classList.add("hidden");
-    peladasSection.classList.remove("hidden");
-    carregarPeladas();
-  } else {
-    usuario = null;
-    loginSection.classList.remove("hidden");
-    peladasSection.classList.add("hidden");
-  }
-});
+// 📦 VARIÁVEIS
+let peladaAtualId = null;
+let jogadores = [];
+let times = { A: [], B: [] };
 
-/* PELADAS */
-window.criarPelada = async function () {
-  await addDoc(collection(db, "peladas"), {
+// ⚽ PELADAS
+function criarPelada() {
+  db.collection("peladas").add({
     nome: nomePelada.value,
-    owner: usuario.uid,
-    createdAt: serverTimestamp()
-  });
-  nomePelada.value = "";
-  carregarPeladas();
-};
+    owner: auth.currentUser.uid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(carregarPeladas);
+}
 
-async function carregarPeladas() {
+function carregarPeladas() {
   listaPeladas.innerHTML = "";
-  const q = query(collection(db, "peladas"), where("owner", "==", usuario.uid));
-  const snap = await getDocs(q);
-
-  snap.forEach(docSnap => {
-    const div = document.createElement("div");
-    div.textContent = docSnap.data().nome;
-    div.className = "p-2 border mb-1 cursor-pointer";
-    div.onclick = () => abrirPelada(docSnap.id, docSnap.data().nome);
-    listaPeladas.appendChild(div);
-  });
+  db.collection("peladas")
+    .where("owner", "==", auth.currentUser.uid)
+    .orderBy("createdAt", "desc")
+    .get()
+    .then(snap => {
+      snap.forEach(doc => {
+        const li = document.createElement("li");
+        li.innerHTML = `<button class="underline">${doc.data().nome}</button>`;
+        li.onclick = () => abrirPelada(doc.id, doc.data().nome);
+        listaPeladas.appendChild(li);
+      });
+    });
 }
 
 function abrirPelada(id, nome) {
-  peladaAtual = id;
-  tituloPelada.textContent = nome;
-  peladasSection.classList.add("hidden");
+  peladaAtualId = id;
+  jogadores = [];
   peladaSection.classList.remove("hidden");
+  tituloPelada.innerText = nome;
   carregarJogadores();
 }
 
-/* JOGADORES */
-window.adicionarJogador = async function () {
-  await addDoc(collection(db, "jogadores"), {
-    peladaId: peladaAtual,
-    nome: nomeJogador.value,
-    partidas: 0,
-    vitorias: 0,
-    derrotas: 0,
-    gols: 0
-  });
-  nomeJogador.value = "";
-  carregarJogadores();
-};
+// 👤 JOGADORES
+function adicionarJogador() {
+  db.collection("peladas").doc(peladaAtualId)
+    .collection("jogadores")
+    .add({ nome: nomeJogador.value })
+    .then(carregarJogadores);
+}
 
-async function carregarJogadores() {
+function carregarJogadores() {
   listaJogadores.innerHTML = "";
-  jogadoresAtual = [];
-  const q = query(collection(db, "jogadores"), where("peladaId", "==", peladaAtual));
-  const snap = await getDocs(q);
+  jogadores = [];
 
-  snap.forEach(d => {
-    jogadoresAtual.push(d);
-    const li = document.createElement("li");
-    li.textContent = d.data().nome;
-    listaJogadores.appendChild(li);
-  });
+  db.collection("peladas").doc(peladaAtualId)
+    .collection("jogadores")
+    .get()
+    .then(snap => {
+      snap.forEach(doc => {
+        jogadores.push(doc.data().nome);
+        const li = document.createElement("li");
+        li.innerText = doc.data().nome;
+        listaJogadores.appendChild(li);
+      });
+    });
 }
 
-/* TIMES */
-window.gerarTimes = function () {
-  timeA = [];
-  timeB = [];
-  jogadoresAtual.forEach((j, i) => {
-    (i % 2 === 0 ? timeA : timeB).push(j);
+// 🔀 TIMES
+function gerarTimes() {
+  times = { A: [], B: [] };
+  jogadores.forEach((j, i) => {
+    times[i % 2 === 0 ? "A" : "B"].push(j);
   });
 
-  times.innerHTML = `
-    <strong>Time A:</strong> ${timeA.map(j => j.data().nome).join(", ")}<br>
-    <strong>Time B:</strong> ${timeB.map(j => j.data().nome).join(", ")}
+  timesGerados.innerHTML = `
+    <strong>Time A:</strong> ${times.A.join(", ")}<br>
+    <strong>Time B:</strong> ${times.B.join(", ")}<br>
+    <input id="placarA" class="border p-1 w-16" placeholder="A">
+    <input id="placarB" class="border p-1 w-16" placeholder="B">
   `;
-};
+}
 
-/* PARTIDA + ESTATÍSTICAS */
-window.salvarPartida = async function () {
-  const pa = Number(placarA.value);
-  const pb = Number(placarB.value);
-
-  await addDoc(collection(db, "partidas"), {
-    peladaId: peladaAtual,
-    timeA: timeA.map(j => j.data().nome),
-    timeB: timeB.map(j => j.data().nome),
-    placarA: pa,
-    placarB: pb,
-    data: serverTimestamp()
-  });
-
-  for (const j of jogadoresAtual) {
-    const ref = doc(db, "jogadores", j.id);
-    const venceu =
-      (timeA.includes(j) && pa > pb) ||
-      (timeB.includes(j) && pb > pa);
-
-    await updateDoc(ref, {
-      partidas: increment(1),
-      vitorias: increment(venceu ? 1 : 0),
-      derrotas: increment(!venceu ? 1 : 0)
+// 💾 PARTIDA
+function salvarPartida() {
+  db.collection("peladas").doc(peladaAtualId)
+    .collection("partidas")
+    .add({
+      timeA: times.A,
+      timeB: times.B,
+      placarA: Number(placarA.value),
+      placarB: Number(placarB.value),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+}
+
+// 📊 ESTATÍSTICAS
+function carregarEstatisticas() {
+  const stats = {};
+
+  function init(nome) {
+    if (!stats[nome]) {
+      stats[nome] = {
+        partidas: 0,
+        vitorias: 0,
+        derrotas: 0,
+        empates: 0,
+        golsPro: 0,
+        golsContra: 0
+      };
+    }
   }
 
-  alert("Partida salva com sucesso");
-};
+  db.collection("peladas").doc(peladaAtualId)
+    .collection("partidas")
+    .get()
+    .then(snap => {
+      snap.forEach(doc => {
+        const p = doc.data();
+        p.timeA.forEach(j => init(j));
+        p.timeB.forEach(j => init(j));
 
-/* RANKING */
-window.carregarRanking = async function () {
-  ranking.innerHTML = "<h3 class='font-bold'>Ranking</h3>";
+        p.timeA.forEach(j => {
+          stats[j].partidas++;
+          stats[j].golsPro += p.placarA;
+          stats[j].golsContra += p.placarB;
+          p.placarA > p.placarB ? stats[j].vitorias++ :
+          p.placarA < p.placarB ? stats[j].derrotas++ :
+          stats[j].empates++;
+        });
 
-  const q = query(
-    collection(db, "jogadores"),
-    where("peladaId", "==", peladaAtual),
-    orderBy("vitorias", "desc")
-  );
+        p.timeB.forEach(j => {
+          stats[j].partidas++;
+          stats[j].golsPro += p.placarB;
+          stats[j].golsContra += p.placarA;
+          p.placarB > p.placarA ? stats[j].vitorias++ :
+          p.placarB < p.placarA ? stats[j].derrotas++ :
+          stats[j].empates++;
+        });
+      });
 
-  const snap = await getDocs(q);
-  snap.forEach(d => {
-    const j = d.data();
-    ranking.innerHTML += `
-      <div>${j.nome} - ${j.vitorias} vitórias</div>
-    `;
-  });
-};
+      estatisticas.innerHTML = "";
+      Object.entries(stats).forEach(([nome, s]) => {
+        const aproveitamento = s.partidas
+          ? Math.round((s.vitorias / s.partidas) * 100)
+          : 0;
 
-/* VOLTAR */
-window.voltarPeladas = function () {
+        estatisticas.innerHTML += `
+          <div class="border p-2 mb-2">
+            <strong>${nome}</strong><br>
+            Partidas: ${s.partidas} |
+            Vitórias: ${s.vitorias} |
+            Empates: ${s.empates} |
+            Derrotas: ${s.derrotas}<br>
+            Gols Pró: ${s.golsPro} |
+            Gols Contra: ${s.golsContra}<br>
+            Aproveitamento: ${aproveitamento}%
+          </div>
+        `;
+      });
+    });
+}
+
+function voltarPeladas() {
   peladaSection.classList.add("hidden");
-  peladasSection.classList.remove("hidden");
-};
+}
