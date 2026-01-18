@@ -1,99 +1,63 @@
-console.log("app.js carregado");
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ousadia & Alegria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-// Firebase (compat)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  <!-- Tailwind CDN (ok para testes) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
 
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <!-- LOGIN -->
+  <div id="telaLogin" class="max-w-md mx-auto mt-16 bg-white p-6 rounded shadow">
+    <h1 class="text-xl font-bold text-center mb-4">⚽ Ousadia & Alegria</h1>
 
-/* 🔑 CONFIG */
-const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-};
+    <input id="email" type="email" placeholder="Email"
+      class="w-full border p-2 mb-2 rounded" />
 
-/* INIT */
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+    <input id="senha" type="password" placeholder="Senha"
+      class="w-full border p-2 mb-4 rounded" />
 
-/* ELEMENTOS */
-const telaLogin = document.getElementById("telaLogin");
-const telaHome = document.getElementById("telaHome");
-const listaPeladas = document.getElementById("listaPeladas");
+    <button onclick="login()"
+      class="w-full bg-blue-600 text-white p-2 rounded mb-2">
+      Entrar
+    </button>
 
-/* 🔓 LOGIN */
-window.login = async function () {
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
+    <button onclick="cadastrar()"
+      class="w-full bg-gray-600 text-white p-2 rounded">
+      Criar conta
+    </button>
+  </div>
 
-  try {
-    await signInWithEmailAndPassword(auth, email, senha);
-  } catch (e) {
-    alert("Erro ao logar");
-    console.error(e);
-  }
-};
+  <!-- HOME -->
+  <div id="telaHome" class="hidden max-w-md mx-auto mt-10 bg-white p-6 rounded shadow">
+    <h2 class="text-lg font-bold mb-2">Bem-vindo à pelada</h2>
+    <p class="mb-4">Ousadia & Alegria</p>
 
-/* 🚪 LOGOUT */
-window.logout = async function () {
-  await signOut(auth);
-};
+    <div id="areaAdmin" class="hidden mb-4">
+      <h3 class="font-bold mb-2">Área do ADM</h3>
+      <input id="dataPelada" type="date" class="border p-2 w-full mb-2 rounded">
+      <input id="localPelada" type="text" placeholder="Local"
+        class="border p-2 w-full mb-2 rounded">
+      <button onclick="salvarPelada()"
+        class="w-full bg-green-600 text-white p-2 rounded">
+        Salvar Pelada
+      </button>
+    </div>
 
-/* 🔁 AUTH STATE */
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    telaLogin.classList.add("hidden");
-    telaHome.classList.remove("hidden");
-    carregarPeladas();
-  } else {
-    telaLogin.classList.remove("hidden");
-    telaHome.classList.add("hidden");
-  }
-});
+    <button onclick="confirmarPresenca()"
+      class="w-full bg-blue-500 text-white p-2 rounded mb-2">
+      Confirmar Presença
+    </button>
 
-/* ⚽ PELADAS */
-window.criarPelada = async function () {
-  const nome = prompt("Nome da pelada");
-  if (!nome) return;
+    <button onclick="logout()"
+      class="w-full bg-red-500 text-white p-2 rounded">
+      Sair
+    </button>
+  </div>
 
-  await addDoc(collection(db, "peladas"), {
-    nome,
-    ownerId: auth.currentUser.uid,
-    createdAt: serverTimestamp()
-  });
-
-  carregarPeladas();
-};
-
-async function carregarPeladas() {
-  listaPeladas.innerHTML = "";
-
-  const q = query(
-    collection(db, "peladas"),
-    where("ownerId", "==", auth.currentUser.uid)
-  );
-
-  const snap = await getDocs(q);
-
-  snap.forEach(doc => {
-    const div = document.createElement("div");
-    div.textContent = doc.data().nome;
-    div.className = "border p-2 rounded mb-1";
-    listaPeladas.appendChild(div);
-  });
-}
+  <script type="module" src="app.js"></script>
+</body>
+</html>
